@@ -15,6 +15,9 @@ export const adminDatabaseConnectionConfig: Knex.Config = {
   migrations: {
     directory: path.resolve(__dirname, "migrations"),
   },
+  seeds: {
+    directory: path.resolve(__dirname, "seeds"),
+  },
 };
 
 function createDatabaseConnection(): Knex {

@@ -4,11 +4,28 @@ import { createPoint, serializePoint, PointJson } from "./model";
 import databaseConnection from "../../database/connection";
 import pointItemService from "../point-item/service";
 import itemService from "../item/service";
-import { serializePersistenceResult } from "../model";
+import {
+  serializePersistenceResult as serializeResult,
+  serializeFetchListResult,
+} from "../model";
 import { Transaction } from "knex";
 
 export default class PointController {
-  public async create(request: Request, response: Response) {
+  public findAll = async (request: Request, response: Response) => {
+    try {
+      const points = await pointService.findAll();
+      response.json(
+        serializeFetchListResult(points, (point) =>
+          serializePoint(request, point)
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      response.json(serializeResult(false, error));
+    }
+  };
+
+  public create = async (request: Request, response: Response) => {
     const {
       name,
       email,
@@ -39,26 +56,32 @@ export default class PointController {
 
       const point = await this._findById(request, id, trx);
 
-      response.json(serializePersistenceResult(true, point));
+      response.json(serializeResult(true, point));
 
       trx.commit();
     } catch (error) {
+      console.error("Transaction rollback", error);
       trx.rollback();
-      response.json(serializePersistenceResult(false, error));
+      response.json(serializeResult(false, error));
     }
-  }
+  };
 
-  public async findById(request: Request, response: Response) {
-    const { id } = request.params;
-    const point = await this._findById(request, Number(id));
-    response.json(point);
-  }
+  public findById = async (request: Request, response: Response) => {
+    try {
+      const { id } = request.params;
+      const point = await this._findById(request, Number(id));
+      response.json(serializeResult(true, point));
+    } catch (error) {
+      console.error(error);
+      response.json(serializeResult(false, error));
+    }
+  };
 
-  private async _findById(
+  private _findById = async (
     request: Request,
     id: number,
     trx?: Transaction
-  ): Promise<PointJson> {
+  ): Promise<PointJson> => {
     const point = await pointService.findById(id, trx);
 
     const itemsIds = (await pointItemService.findAllByPointId(id, trx)).map(
@@ -68,5 +91,5 @@ export default class PointController {
     const relItems = await itemService.findAllByIdIn(itemsIds, trx);
 
     return serializePoint(request, point, relItems);
-  }
+  };
 }

@@ -4,6 +4,11 @@ export interface AbstractModel {
   updated_at: Date;
 }
 
+export interface FetchModelListResult<T extends AbstractModel> {
+  items: T[];
+  count: number;
+}
+
 export interface AbstractJson {
   id?: number;
 }
@@ -33,6 +38,17 @@ export interface ErrorResultJson extends AbstractResultJson {
   error: ErrorJson;
 }
 
+export interface FetchListResultJson<T extends AbstractJson>
+  extends AbstractResultJson {
+  success: true;
+  count: number;
+  items: T[];
+}
+
+interface ModelSerializer<M extends AbstractModel, J extends AbstractJson> {
+  (model: M): J;
+}
+
 interface ModelFactory<T extends AbstractModel> {
   (model: AbstractModel): T;
 }
@@ -48,6 +64,20 @@ export function serializeAbstractJson<
   return factory({
     id: model.id,
   });
+}
+
+export function serializeFetchListResult<
+  M extends AbstractModel,
+  J extends AbstractJson
+>(
+  fetchResult: FetchModelListResult<M>,
+  modelSerializer: ModelSerializer<M, J>
+): FetchListResultJson<J> {
+  return {
+    success: true,
+    items: fetchResult.items.map(modelSerializer),
+    count: fetchResult.count,
+  };
 }
 
 export function serializePersistenceResult<T extends AbstractJson>(

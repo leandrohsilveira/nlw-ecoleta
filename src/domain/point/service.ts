@@ -2,6 +2,7 @@ import databaseConnection from "../../database/connection";
 import { Point } from "./model";
 import pointItemService from "../point-item/service";
 import { Transaction } from "knex";
+import { FetchModelListResult } from "../model";
 
 function pointConnection(trx?: Transaction) {
   return (trx ?? databaseConnection)("point");
@@ -19,8 +20,13 @@ async function create(
   return point_id;
 }
 
-async function findAll(trx?: Transaction): Promise<Point[]> {
-  return await pointConnection(trx).select("*");
+async function findAll(
+  trx?: Transaction
+): Promise<FetchModelListResult<Point>> {
+  const items = await pointConnection(trx).select("*");
+  const [{ "count(*)": count }] = await pointConnection(trx).count();
+
+  return { items, count };
 }
 
 async function findById(id: number, trx?: Transaction): Promise<Point> {

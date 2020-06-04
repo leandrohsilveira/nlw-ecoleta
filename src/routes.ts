@@ -1,7 +1,8 @@
 import express from "express";
+import itemRouter from "./domain/item/routes";
 
 const routes = express.Router();
 
-routes.get("/", (req, res) => res.json({ message: "Hello world" }));
+routes.use("/items", itemRouter);
 
 export default routes;

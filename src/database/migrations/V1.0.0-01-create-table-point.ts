@@ -2,9 +2,7 @@ import Knex from "knex";
 
 export async function up(knex: Knex) {
   return knex.schema.createTable("point", (table) => {
-    table.uuid("uuid").primary();
-    table.timestamp("createdDate").notNullable();
-    table.timestamp("lastUpdatedDate").notNullable();
+    table.bigIncrements("id").primary();
     table.string("image").notNullable();
     table.string("name").notNullable();
     table.string("whatsapp").notNullable();
@@ -12,6 +10,7 @@ export async function up(knex: Knex) {
     table.float("longitude").notNullable();
     table.string("city").notNullable();
     table.string("uf", 2).notNullable();
+    table.timestamps();
   });
 }
 

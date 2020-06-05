@@ -2,18 +2,23 @@ import { Request, Response } from "express";
 import pointService from "./service";
 import { createPoint, serializePoint, PointJson } from "./model";
 import databaseConnection from "../../database/connection";
-import pointItemService from "../point-item/service";
 import itemService from "../item/service";
 import {
   serializePersistenceResult as serializeResult,
   serializeFetchListResult,
 } from "../model";
 import { Transaction } from "knex";
+import requestUtil from "../../util/request-util";
 
 export default class PointController {
   public findAll = async (request: Request, response: Response) => {
     try {
-      const points = await pointService.findAll();
+      const filters = {
+        cities: requestUtil.queryAsArray(request, "city", String),
+        ufs: requestUtil.queryAsArray(request, "uf", String),
+        items: requestUtil.queryAsArray(request, "item", Number),
+      };
+      const points = await pointService.findAll(filters);
       response.json(
         serializeFetchListResult(points, (point) =>
           serializePoint(request, point)

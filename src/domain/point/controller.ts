@@ -55,10 +55,20 @@ export default class PointController {
       );
 
       const point = await this._findById(request, id, trx);
-
-      response.json(serializeResult(true, point));
-
-      trx.commit();
+      if (point) {
+        response.json(serializeResult(true, point));
+        trx.commit();
+      } else {
+        console.error(
+          `Transaction rollback: Something gone wrong because the created point with id ${id} was not found`
+        );
+        response.status(500).json(
+          serializeResult(false, {
+            message: `Something gone wrong because the created point with id ${id} was not found`,
+          })
+        );
+        trx.rollback();
+      }
     } catch (error) {
       console.error("Transaction rollback", error);
       trx.rollback();
@@ -70,7 +80,11 @@ export default class PointController {
     try {
       const { id } = request.params;
       const point = await this._findById(request, Number(id));
-      response.json(serializeResult(true, point));
+      if (point) response.json(serializeResult(true, point));
+      else
+        response
+          .status(404)
+          .json(serializeResult(false, { message: "Point not found" }));
     } catch (error) {
       console.error(error);
       response.json(serializeResult(false, error));
@@ -81,15 +95,17 @@ export default class PointController {
     request: Request,
     id: number,
     trx?: Transaction
-  ): Promise<PointJson> => {
+  ): Promise<PointJson | null> => {
     const point = await pointService.findById(id, trx);
+    if (point) {
+      const itemsIds = (await pointItemService.findAllByPointId(id, trx)).map(
+        (pointItem) => pointItem.item_id
+      );
 
-    const itemsIds = (await pointItemService.findAllByPointId(id, trx)).map(
-      (pointItem) => pointItem.item_id
-    );
+      const relItems = await itemService.findAllByIdIn(itemsIds, trx);
 
-    const relItems = await itemService.findAllByIdIn(itemsIds, trx);
-
-    return serializePoint(request, point, relItems);
+      return serializePoint(request, point, relItems);
+    }
+    return null;
   };
 }

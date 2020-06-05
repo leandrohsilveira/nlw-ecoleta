@@ -16,7 +16,9 @@ async function findAllByPointItemPointId(
 ): Promise<Item[]> {
   return itemConnection(trx)
     .join("point_item", "item.id", "=", "point_item.item_id")
-    .where("point_item.point_id", point_id);
+    .where("point_item.point_id", point_id)
+    .distinct()
+    .select("item.*");
 }
 
 const itemService = {

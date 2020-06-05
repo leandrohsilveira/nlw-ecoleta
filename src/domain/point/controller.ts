@@ -98,13 +98,8 @@ export default class PointController {
   ): Promise<PointJson | null> => {
     const point = await pointService.findById(id, trx);
     if (point) {
-      const itemsIds = (await pointItemService.findAllByPointId(id, trx)).map(
-        (pointItem) => pointItem.item_id
-      );
-
-      const relItems = await itemService.findAllByIdIn(itemsIds, trx);
-
-      return serializePoint(request, point, relItems);
+      const items = await itemService.findAllByPointItemPointId(id, trx);
+      return serializePoint(request, point, items);
     }
     return null;
   };

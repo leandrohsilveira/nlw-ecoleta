@@ -10,16 +10,18 @@ async function findAll(trx?: Transaction): Promise<Item[]> {
   return itemConnection(trx).select("*");
 }
 
-async function findAllByIdIn(
-  ids: number[],
+async function findAllByPointItemPointId(
+  point_id: number,
   trx?: Transaction
 ): Promise<Item[]> {
-  return itemConnection(trx).select("*").whereIn("id", ids);
+  return itemConnection(trx)
+    .join("point_item", "item.id", "=", "point_item.item_id")
+    .where("point_item.point_id", point_id);
 }
 
 const itemService = {
   findAll,
-  findAllByIdIn,
+  findAllByPointItemPointId,
 };
 
 export default itemService;

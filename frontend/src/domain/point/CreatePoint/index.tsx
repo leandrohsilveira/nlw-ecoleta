@@ -29,8 +29,11 @@ const CreatePoint = () => {
     setMunicipios
   );
 
-  const [ufId, setUfId] = useState<number>();
+  const [ufId, setUfId] = useState(-1);
   const selectedUf = useMemo(() => ufs.find((i) => i.id === ufId), [ufs, ufId]);
+
+  const [municipioId, setMunicipioId] = useState(-1);
+  //const selectedMunicipio = useMemo(() => municipios.find(m => m.id === municipioId), [municipios, municipioId]);
 
   useEffect(() => {
     fetchItems();
@@ -96,14 +99,15 @@ const CreatePoint = () => {
                 <select
                   name="uf"
                   id="uf"
+                  value={ufId}
                   onChange={(e) => setUfId(Number(e.target.value))}
                 >
                   {ufsLoading ? (
-                    <option key={-1} disabled selected>
+                    <option key={-1} value={-1} disabled>
                       Carregando UFS...
                     </option>
                   ) : (
-                    <option key={-1} disabled selected>
+                    <option key={-1} value={-1} disabled>
                       Selecione uma UF
                     </option>
                   )}
@@ -117,19 +121,24 @@ const CreatePoint = () => {
               </div>
               <div className="field">
                 <label htmlFor="city">Cidade</label>
-                <select name="city" id="city">
+                <select
+                  name="city"
+                  id="city"
+                  value={municipioId}
+                  onChange={(e) => setMunicipioId(Number(e.target.value))}
+                >
                   {selectedUf && !municipiosLoading && (
-                    <option key={-1} disabled selected>
+                    <option key={-1} value={-1} disabled>
                       Selecione uma cidade
                     </option>
                   )}
                   {!selectedUf && !municipiosLoading && (
-                    <option key={-1} disabled selected>
+                    <option key={-1} value={-1} disabled>
                       Selecione uma UF primeiro
                     </option>
                   )}
                   {municipiosLoading && (
-                    <option key={-1} disabled selected>
+                    <option key={-1} value={-1} disabled>
                       Carregando cidades de {selectedUf?.sigla}
                     </option>
                   )}

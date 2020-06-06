@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  ChangeEvent,
+} from "react";
 
 import logo from "../../../assets/logo.svg";
 
@@ -52,6 +58,17 @@ const CreatePoint = () => {
     ibgeService.findAllMunicipiosByUf,
     setMunicipios
   );
+  const handleFormDataChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setFormData((_formData) => ({
+        ..._formData,
+        [name]: value,
+      }));
+    },
+    []
+  );
+
   useEffect(() => {
     fetchItems();
     fetchUfs();
@@ -82,16 +99,34 @@ const CreatePoint = () => {
             </legend>
             <div className="field">
               <label htmlFor="name">Nome da entidade</label>
-              <input id="name" type="text" name="name" />
+              <input
+                id="name"
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleFormDataChange}
+              />
             </div>
             <div className="field-group">
               <div className="field">
                 <label htmlFor="email">E-mail</label>
-                <input id="email" type="email" name="email" />
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleFormDataChange}
+                />
               </div>
               <div className="field">
                 <label htmlFor="whatsapp">WhatsApp</label>
-                <input id="whatsapp" type="text" name="whatsapp" />
+                <input
+                  id="whatsapp"
+                  type="text"
+                  name="whatsapp"
+                  value={formData.whatsapp}
+                  onChange={handleFormDataChange}
+                />
               </div>
             </div>
           </fieldset>

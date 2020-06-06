@@ -22,6 +22,29 @@ const CreatePoint = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [ufs, setUfs] = useState<IbgeUF[]>([]);
   const [municipios, setMunicipios] = useState<IbgeMunicipio[]>([]);
+  const [ufId, setUfId] = useState(-1);
+  const [municipioId, setMunicipioId] = useState(-1);
+  const [selectedPosition, setSelectedPosition] = useState<LatLngExpression>();
+  //const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    whatsapp: "",
+  });
+
+  const selectedUf = useMemo(
+    () => (ufId !== -1 ? ufs.find((i) => i.id === ufId) : null),
+    [ufs, ufId]
+  );
+  // const selectedMunicipio = useMemo(
+  //   () =>
+  //     municipioId !== -1 ? municipios.find((m) => m.id === municipioId) : null,
+  //   [municipios, municipioId]
+  // );
+  const [mapCenter] = useGeolocation(latLngPositionParser, {
+    latitude: 0,
+    longitude: 0,
+  });
 
   const [fetchItems] = useApiCallback(itemService.findAll, setItems);
   const [fetchUfs, ufsLoading] = useApiCallback(ibgeService.findAllUfs, setUfs);
@@ -29,27 +52,6 @@ const CreatePoint = () => {
     ibgeService.findAllMunicipiosByUf,
     setMunicipios
   );
-
-  const [ufId, setUfId] = useState(-1);
-  const selectedUf = useMemo(
-    () => (ufId !== -1 ? ufs.find((i) => i.id === ufId) : null),
-    [ufs, ufId]
-  );
-
-  const [municipioId, setMunicipioId] = useState(-1);
-  // const selectedMunicipio = useMemo(
-  //   () =>
-  //     municipioId !== -1 ? municipios.find((m) => m.id === municipioId) : null,
-  //   [municipios, municipioId]
-  // );
-
-  const [selectedPosition, setSelectedPosition] = useState<LatLngExpression>();
-
-  const [mapCenter] = useGeolocation(latLngPositionParser, {
-    latitude: 0,
-    longitude: 0,
-  });
-
   useEffect(() => {
     fetchItems();
     fetchUfs();

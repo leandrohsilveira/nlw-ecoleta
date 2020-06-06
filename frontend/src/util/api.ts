@@ -12,12 +12,11 @@ function createApi() {
   });
 }
 
-export function useStateFromApi<T>(
-  request: RequestFactory<T>,
-  initialState: T
-) {
-  const [state, setState] = useState<T>(initialState);
-  const fetch = useCallback(() => {
+export function createIbgeApi(version = "v1") {
+  return axios.create({
+    baseURL: `https://servicodados.ibge.gov.br/api/${version}`,
+  });
+}
     async function doFetch() {
       setState(await request());
     }

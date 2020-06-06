@@ -1,7 +1,7 @@
 @media screen and (min-width: 1500px) {
   #page-home {
     height: 100vh;
-    background: url("../assets/home-background.svg") no-repeat 85% bottom;
+    background: url("../../assets/home-background.svg") no-repeat 85% bottom;
   }
 }
 
@@ -9,7 +9,7 @@
   #page-home {
     height: 100vh;
 
-    background: url("../assets/home-background.svg") no-repeat 530px bottom;
+    background: url("../../assets/home-background.svg") no-repeat 530px bottom;
   }
 }
 

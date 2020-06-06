@@ -3,8 +3,8 @@ import { Item } from "../model";
 
 async function findAll() {
   const api = createApi();
-  const response = await api.get("/items");
-  return response.data as Item[];
+  const response = await api.get<Item[]>("/items");
+  return response.data;
 }
 
 const itemService = {

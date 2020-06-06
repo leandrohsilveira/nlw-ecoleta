@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 import logo from "../../../assets/logo.svg";
 
@@ -10,12 +10,36 @@ import { FiArrowLeft } from "react-icons/fi";
 import { Map, TileLayer, Marker } from "react-leaflet";
 import L from "leaflet";
 import itemService from "../../item/service/itemService";
-import { useStateFromApi } from "../../../util/api";
+import { useApiCallback } from "../../../util/api";
+import ibgeService from "../../ibge/service/ibgeService";
+import { Item } from "../../item/model";
+import { IbgeUF, IbgeMunicipio } from "../../ibge/model";
 
 L.Icon.Default.imagePath = "assets/images/";
 
 const CreatePoint = () => {
-  const items = useStateFromApi(() => itemService.findAll(), []);
+  const [items, setItems] = useState<Item[]>([]);
+  const [ufs, setUfs] = useState<IbgeUF[]>([]);
+  const [municipios, setMunicipios] = useState<IbgeMunicipio[]>([]);
+
+  const [fetchItems] = useApiCallback(itemService.findAll, setItems);
+  const [fetchUfs, ufsLoading] = useApiCallback(ibgeService.findAllUfs, setUfs);
+  const [fetchMunicipios, municipiosLoading] = useApiCallback(
+    ibgeService.findAllMunicipiosByUf,
+    setMunicipios
+  );
+
+  const [ufId, setUfId] = useState<number>();
+  const selectedUf = useMemo(() => ufs.find((i) => i.id === ufId), [ufs, ufId]);
+
+  useEffect(() => {
+    fetchItems();
+    fetchUfs();
+  }, [fetchItems, fetchUfs]);
+
+  useEffect(() => {
+    ufId && fetchMunicipios(ufId);
+  }, [ufId, fetchMunicipios]);
 
   return (
     <div id="page-create-point">
@@ -69,14 +93,51 @@ const CreatePoint = () => {
             <div className="field-group">
               <div className="field">
                 <label htmlFor="uf">Estado (UF)</label>
-                <select name="uf" id="uf">
-                  <option value="0">Selecione um estado</option>
+                <select
+                  name="uf"
+                  id="uf"
+                  onChange={(e) => setUfId(Number(e.target.value))}
+                >
+                  {ufsLoading ? (
+                    <option key={-1} disabled selected>
+                      Carregando UFS...
+                    </option>
+                  ) : (
+                    <option key={-1} disabled selected>
+                      Selecione uma UF
+                    </option>
+                  )}
+
+                  {ufs.map(({ id, nome, sigla }) => (
+                    <option key={id} value={id}>
+                      {nome} ({sigla})
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="field">
                 <label htmlFor="city">Cidade</label>
                 <select name="city" id="city">
-                  <option value="0">Selecione uma cidade</option>
+                  {selectedUf && !municipiosLoading && (
+                    <option key={-1} disabled selected>
+                      Selecione uma cidade
+                    </option>
+                  )}
+                  {!selectedUf && !municipiosLoading && (
+                    <option key={-1} disabled selected>
+                      Selecione uma UF primeiro
+                    </option>
+                  )}
+                  {municipiosLoading && (
+                    <option key={-1} disabled selected>
+                      Carregando cidades de {selectedUf?.sigla}
+                    </option>
+                  )}
+                  {municipios.map(({ id, nome }) => (
+                    <option key={id} value={id}>
+                      {nome}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>

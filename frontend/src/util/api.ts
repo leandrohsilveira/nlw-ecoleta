@@ -1,9 +1,13 @@
 import axios from "axios";
 import config from "../config";
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useState } from "react";
 
-interface RequestFactory<T> {
-  (): Promise<T>;
+interface RequestFactory<T, Z extends Array<any>> {
+  (...args: Z): Promise<T>;
+}
+
+interface Consumer<T> {
+  (value: T): void;
 }
 
 function createApi() {
@@ -17,16 +21,28 @@ export function createIbgeApi(version = "v1") {
     baseURL: `https://servicodados.ibge.gov.br/api/${version}`,
   });
 }
-    async function doFetch() {
-      setState(await request());
-    }
-    doFetch();
-  }, [setState, request]);
 
-  useEffect(() => {
-    fetch();
-  }, [fetch]);
-  return state;
+export function useApiCallback<T, Z extends Array<any>>(
+  requestFactory: RequestFactory<T, Z>,
+  setter: Consumer<T>,
+  initialLoadingState = false
+): [(...args: Z) => void, boolean] {
+  const [loading, setLoading] = useState(initialLoadingState);
+  return [
+    useCallback(
+      (...args) => {
+        async function doFetch() {
+          setLoading(true);
+          const result = await requestFactory(...args);
+          setter(result);
+          setLoading(false);
+        }
+        doFetch();
+      },
+      [requestFactory, setter]
+    ),
+    loading,
+  ];
 }
 
 export default createApi;

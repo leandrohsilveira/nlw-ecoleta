@@ -14,6 +14,7 @@ import { useApiCallback } from "../../../util/api";
 import ibgeService from "../../ibge/service/ibgeService";
 import { Item } from "../../item/model";
 import { IbgeUF, IbgeMunicipio } from "../../ibge/model";
+import useGeolocation, { latLngPositionParser } from "../../../util/location";
 
 L.Icon.Default.imagePath = "assets/images/";
 
@@ -42,7 +43,12 @@ const CreatePoint = () => {
   //   [municipios, municipioId]
   // );
 
-  const [position, setPosition] = useState<LatLngExpression>();
+  const [selectedPosition, setSelectedPosition] = useState<LatLngExpression>();
+
+  const [mapCenter] = useGeolocation(latLngPositionParser, {
+    latitude: 0,
+    longitude: 0,
+  });
 
   useEffect(() => {
     fetchItems();
@@ -95,17 +101,17 @@ const CreatePoint = () => {
             </legend>
 
             <Map
-              center={[-26.2779994, -48.8095674]}
+              center={mapCenter}
               zoom={15}
               onClick={({ latlng }: LeafletMouseEvent) =>
-                setPosition([latlng.lat, latlng.lng])
+                setSelectedPosition([latlng.lat, latlng.lng])
               }
             >
               <TileLayer
                 attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              {position && <Marker position={position} />}
+              {selectedPosition && <Marker position={selectedPosition} />}
             </Map>
 
             <div className="field-group">

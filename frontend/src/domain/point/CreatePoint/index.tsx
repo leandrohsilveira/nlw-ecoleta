@@ -8,7 +8,7 @@ import "./index.css";
 import { Link } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import { Map, TileLayer, Marker } from "react-leaflet";
-import L from "leaflet";
+import L, { LatLngExpression, LeafletMouseEvent } from "leaflet";
 import itemService from "../../item/service/itemService";
 import { useApiCallback } from "../../../util/api";
 import ibgeService from "../../ibge/service/ibgeService";
@@ -30,10 +30,19 @@ const CreatePoint = () => {
   );
 
   const [ufId, setUfId] = useState(-1);
-  const selectedUf = useMemo(() => ufs.find((i) => i.id === ufId), [ufs, ufId]);
+  const selectedUf = useMemo(
+    () => (ufId !== -1 ? ufs.find((i) => i.id === ufId) : null),
+    [ufs, ufId]
+  );
 
   const [municipioId, setMunicipioId] = useState(-1);
-  //const selectedMunicipio = useMemo(() => municipios.find(m => m.id === municipioId), [municipios, municipioId]);
+  // const selectedMunicipio = useMemo(
+  //   () =>
+  //     municipioId !== -1 ? municipios.find((m) => m.id === municipioId) : null,
+  //   [municipios, municipioId]
+  // );
+
+  const [position, setPosition] = useState<LatLngExpression>();
 
   useEffect(() => {
     fetchItems();
@@ -85,12 +94,18 @@ const CreatePoint = () => {
               <span>Selecione o endereço no mapa</span>
             </legend>
 
-            <Map center={[-26.2779994, -48.8095674]} zoom={15}>
+            <Map
+              center={[-26.2779994, -48.8095674]}
+              zoom={15}
+              onClick={({ latlng }: LeafletMouseEvent) =>
+                setPosition([latlng.lat, latlng.lng])
+              }
+            >
               <TileLayer
                 attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              <Marker position={[-26.2779994, -48.8095674]} />
+              {position && <Marker position={position} />}
             </Map>
 
             <div className="field-group">

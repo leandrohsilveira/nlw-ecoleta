@@ -7,8 +7,6 @@ import React, {
   FormEvent,
 } from "react";
 
-import logo from "../../../assets/logo.svg";
-
 import "leaflet/dist/leaflet.css";
 
 import "./index.css";
@@ -16,14 +14,17 @@ import { Link } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import { Map, TileLayer, Marker } from "react-leaflet";
 import L, { LeafletMouseEvent, LatLngTuple } from "leaflet";
-import itemService from "../../item/service/itemService";
-import { useApiCallback } from "../../../util/api";
-import ibgeService from "../../ibge/service/ibgeService";
-import { Item } from "../../item/model";
-import { IbgeUF, IbgeMunicipio } from "../../ibge/model";
-import useGeolocation, { latLngPositionParser } from "../../../util/location";
-import pointService from "../service/pointService";
-import { Point } from "../model";
+import itemService from "../../../item/service/itemService";
+import { useApiCallback } from "../../../../util/api";
+import ibgeService from "../../../ibge/service/ibgeService";
+import { Item } from "../../../item/model";
+import { IbgeUF, IbgeMunicipio } from "../../../ibge/model";
+import useGeolocation, {
+  latLngPositionParser,
+} from "../../../../util/location";
+import pointService from "../../service/pointService";
+import { Point } from "../../model";
+import Logo from "../../../../layout/Logo";
 
 L.Icon.Default.imagePath = "assets/images/";
 
@@ -79,7 +80,7 @@ const CreatePoint = () => {
     });
   }, []);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const errors: { [key: string]: string } = {};
@@ -111,7 +112,7 @@ const CreatePoint = () => {
         longitude,
       };
 
-      pointService.create(point);
+      await pointService.create(point);
     } else {
       console.error("The form is invalid", errors);
     }
@@ -129,7 +130,7 @@ const CreatePoint = () => {
   return (
     <div id="page-create-point">
       <header>
-        <img src={logo} alt="Ecoleta" />
+        <Logo />
 
         <Link to="/">
           <FiArrowLeft />

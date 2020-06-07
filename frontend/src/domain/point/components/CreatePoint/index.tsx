@@ -10,8 +10,8 @@ import React, {
 import "leaflet/dist/leaflet.css";
 
 import "./index.css";
-import { Link } from "react-router-dom";
-import { FiArrowLeft } from "react-icons/fi";
+import { Link, useHistory } from "react-router-dom";
+import { FiArrowLeft, FiCheckCircle } from "react-icons/fi";
 import { Map, TileLayer, Marker } from "react-leaflet";
 import L, { LeafletMouseEvent, LatLngTuple } from "leaflet";
 import itemService from "../../../item/service/itemService";
@@ -25,6 +25,7 @@ import useGeolocation, {
 import pointService from "../../service/pointService";
 import { Point } from "../../model";
 import Logo from "../../../../components/Logo";
+import Overlay from "../../../../components/Overlay";
 
 L.Icon.Default.imagePath = "assets/images/";
 
@@ -41,7 +42,8 @@ const CreatePoint = () => {
     email: "",
     whatsapp: "",
   });
-
+  const [finished, setFinished] = useState(false);
+  const history = useHistory();
   const selectedUf = useMemo(
     () => (ufId !== -1 ? ufs.find((i) => i.id === ufId) : null),
     [ufs, ufId]
@@ -113,6 +115,7 @@ const CreatePoint = () => {
       };
 
       await pointService.create(point);
+      setFinished(true);
     } else {
       console.error("The form is invalid", errors);
     }
@@ -127,8 +130,20 @@ const CreatePoint = () => {
     ufId && fetchMunicipios(ufId);
   }, [ufId, fetchMunicipios]);
 
+  useEffect(() => {
+    if (finished) setTimeout(() => history.push("/"), 2000);
+  }, [finished, history]);
+
   return (
     <div id="page-create-point">
+      {finished && (
+        <Overlay>
+          <div className="success-message">
+            <FiCheckCircle color="#33CB78" size={50} />
+            <span>Cadastro concluído!</span>
+          </div>
+        </Overlay>
+      )}
       <header>
         <Logo />
 

@@ -4,6 +4,7 @@ import React, {
   useMemo,
   useCallback,
   ChangeEvent,
+  FormEvent,
 } from "react";
 
 import logo from "../../../assets/logo.svg";
@@ -14,13 +15,15 @@ import "./index.css";
 import { Link } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import { Map, TileLayer, Marker } from "react-leaflet";
-import L, { LatLngExpression, LeafletMouseEvent } from "leaflet";
+import L, { LeafletMouseEvent, LatLngTuple } from "leaflet";
 import itemService from "../../item/service/itemService";
 import { useApiCallback } from "../../../util/api";
 import ibgeService from "../../ibge/service/ibgeService";
 import { Item } from "../../item/model";
 import { IbgeUF, IbgeMunicipio } from "../../ibge/model";
 import useGeolocation, { latLngPositionParser } from "../../../util/location";
+import pointService from "../service/pointService";
+import { Point } from "../model";
 
 L.Icon.Default.imagePath = "assets/images/";
 
@@ -30,8 +33,8 @@ const CreatePoint = () => {
   const [municipios, setMunicipios] = useState<IbgeMunicipio[]>([]);
   const [ufId, setUfId] = useState(-1);
   const [municipioId, setMunicipioId] = useState(-1);
-  const [selectedPosition, setSelectedPosition] = useState<LatLngExpression>();
-  //const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
+  const [selectedPosition, setSelectedPosition] = useState<LatLngTuple>();
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -42,11 +45,11 @@ const CreatePoint = () => {
     () => (ufId !== -1 ? ufs.find((i) => i.id === ufId) : null),
     [ufs, ufId]
   );
-  // const selectedMunicipio = useMemo(
-  //   () =>
-  //     municipioId !== -1 ? municipios.find((m) => m.id === municipioId) : null,
-  //   [municipios, municipioId]
-  // );
+  const selectedMunicipio = useMemo(
+    () =>
+      municipioId !== -1 ? municipios.find((m) => m.id === municipioId) : null,
+    [municipios, municipioId]
+  );
   const [mapCenter] = useGeolocation(latLngPositionParser, {
     latitude: 0,
     longitude: 0,
@@ -69,6 +72,51 @@ const CreatePoint = () => {
     []
   );
 
+  const handleItemClick = useCallback((id: number) => {
+    setSelectedItems((_selectedItems) => {
+      if (!_selectedItems.includes(id)) return [..._selectedItems, id];
+      else return _selectedItems.filter((i) => i !== id);
+    });
+  }, []);
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const errors: { [key: string]: string } = {};
+
+    if (!formData.name) errors.name = "The name is required";
+    if (!formData.email) errors.email = "The e-mail is required";
+    if (!formData.whatsapp) errors.whatsapp = "The WhatsApp is required";
+    if (!selectedPosition) errors.position = "The map position is required";
+    if (!selectedUf) errors.uf = "The UF is required";
+    if (!selectedMunicipio) errors.city = "The City is required";
+    if (!selectedItems.length)
+      errors.items = "Should select at least one collect item";
+
+    if (
+      !Object.keys(errors).length &&
+      selectedPosition &&
+      selectedMunicipio &&
+      selectedUf
+    ) {
+      const [latitude, longitude] = selectedPosition;
+
+      const point: Point = {
+        ...formData,
+        image: "fake-image.png",
+        uf: selectedUf?.sigla,
+        city: selectedMunicipio?.nome,
+        items: selectedItems,
+        latitude,
+        longitude,
+      };
+
+      pointService.create(point);
+    } else {
+      console.error("The form is invalid", errors);
+    }
+  }
+
   useEffect(() => {
     fetchItems();
     fetchUfs();
@@ -90,7 +138,7 @@ const CreatePoint = () => {
       </header>
 
       <main>
-        <form>
+        <form onSubmit={handleSubmit}>
           <h1>Cadastro do ponto de coleta</h1>
 
           <fieldset>
@@ -218,7 +266,11 @@ const CreatePoint = () => {
 
             <ul className="items-grid">
               {items.map(({ id, image_url, title }) => (
-                <li key={id}>
+                <li
+                  key={id}
+                  className={selectedItems.includes(id) ? "selected" : ""}
+                  onClick={() => handleItemClick(id)}
+                >
                   <img src={image_url} alt={title} />
                   <span>{title}</span>
                 </li>

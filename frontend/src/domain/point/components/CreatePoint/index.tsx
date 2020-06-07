@@ -24,7 +24,7 @@ import useGeolocation, {
 } from "../../../../util/location";
 import pointService from "../../service/pointService";
 import { Point } from "../../model";
-import Logo from "../../../../layout/Logo";
+import Logo from "../../../../components/Logo";
 
 L.Icon.Default.imagePath = "assets/images/";
 

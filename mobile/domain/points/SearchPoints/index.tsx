@@ -1,11 +1,11 @@
 import React, { FC } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
-import { Feather as Icon } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { TouchableOpacity, ScrollView } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import MapView, { Marker } from "react-native-maps";
 import { SvgUri } from "react-native-svg";
+import BackButton from "../../../components/BackButton";
 
 const SearchPoints: FC = () => {
   const navigation = useNavigation();
@@ -19,9 +19,7 @@ const SearchPoints: FC = () => {
   return (
     <>
       <View style={styles.container}>
-        <TouchableOpacity onPress={handleBackButtonPressed}>
-          <Icon name="arrow-left" size={20} color="#34cb79" />
-        </TouchableOpacity>
+        <BackButton />
 
         <Text style={styles.title}>Bem vindo.</Text>
         <Text style={styles.description}>

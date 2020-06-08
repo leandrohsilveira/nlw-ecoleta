@@ -1,9 +1,9 @@
 import React from "react";
-import { Feather as Icon } from "@expo/vector-icons";
 import { View, Text, StyleSheet, Image, ImageBackground } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import { Routes } from "../Router/routes";
+import IconTextButton from "../IconTextButton";
 
 const Home = () => {
   const navigation = useNavigation();
@@ -27,12 +27,11 @@ const Home = () => {
       </View>
 
       <View style={styles.footer}>
-        <RectButton style={styles.button} onPress={handleSignInButtonPressed}>
-          <View style={styles.buttonIcon}>
-            <Icon name="arrow-right" color="#fff" size={24} />
-          </View>
-          <Text style={styles.buttonText}>Entrar</Text>
-        </RectButton>
+        <IconTextButton
+          icon="arrow-right"
+          text="Entrar"
+          onPress={handleSignInButtonPressed}
+        />
       </View>
     </ImageBackground>
   );
@@ -83,33 +82,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 8,
     paddingHorizontal: 24,
-    fontSize: 16,
-  },
-
-  button: {
-    backgroundColor: "#34CB79",
-    height: 60,
-    flexDirection: "row",
-    borderRadius: 10,
-    overflow: "hidden",
-    alignItems: "center",
-    marginTop: 8,
-  },
-
-  buttonIcon: {
-    height: 60,
-    width: 60,
-    backgroundColor: "rgba(0, 0, 0, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  buttonText: {
-    flex: 1,
-    justifyContent: "center",
-    textAlign: "center",
-    color: "#FFF",
-    fontFamily: "Roboto_500Medium",
     fontSize: 16,
   },
 });

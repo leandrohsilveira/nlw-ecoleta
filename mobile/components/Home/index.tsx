@@ -2,8 +2,16 @@ import React from "react";
 import { Feather as Icon } from "@expo/vector-icons";
 import { View, Text, StyleSheet, Image, ImageBackground } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
+import { useNavigation } from "@react-navigation/native";
+import { Routes } from "../Router/routes";
 
 const Home = () => {
+  const navigation = useNavigation();
+
+  function handleSignInButtonPressed() {
+    navigation.navigate(Routes.SEARCH_POINTS);
+  }
+
   return (
     <ImageBackground
       style={styles.container}
@@ -19,7 +27,7 @@ const Home = () => {
       </View>
 
       <View style={styles.footer}>
-        <RectButton style={styles.button} onPress={() => {}}>
+        <RectButton style={styles.button} onPress={handleSignInButtonPressed}>
           <View style={styles.buttonIcon}>
             <Icon name="arrow-right" color="#fff" size={24} />
           </View>

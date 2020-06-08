@@ -2,7 +2,10 @@ import React from "react";
 import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import Home from "./components/Home";
+import Home from "../Home";
+import SearchPoints from "../../domain/points/SearchPoints";
+import PointDetail from "../../domain/points/PointDetail";
+import { Routes } from "./routes";
 
 const AppStack = createStackNavigator();
 
@@ -15,7 +18,7 @@ const Router = () => {
           cardStyle: styles.card,
         }}
       >
-        <AppStack.Screen name="Home" component={Home} />
+        <AppStack.Screen name={Routes.HOME} component={Home} />
       </AppStack.Navigator>
     </NavigationContainer>
   );

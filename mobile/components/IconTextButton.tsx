@@ -1,28 +1,51 @@
 import React, { Props, FC } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  StyleProp,
+  ViewStyle,
+  TextStyle,
+} from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import { Feather as Icon } from "@expo/vector-icons";
 
 interface IconTextButtonProps extends Props<IconTextButtonProps> {
   onPress?: (pointerInside: boolean) => void;
-  icon?: string;
+  icon?: string | JSX.Element;
   text?: string;
+  style?: StyleProp<ViewStyle>;
+  iconContainerStyle?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
+  enabled?: boolean;
 }
 
 const IconTextButton: FC<IconTextButtonProps> = ({
   icon,
   text,
+  style,
+  iconContainerStyle,
+  textStyle,
   onPress,
   children,
+  enabled = true,
 }) => {
   return (
-    <RectButton style={styles.button} onPress={onPress}>
+    <RectButton
+      enabled={enabled}
+      style={style ?? styles.button}
+      onPress={onPress}
+    >
       {!!icon && (
-        <View style={styles.buttonIcon}>
-          <Icon name={icon} color="#fff" size={24} />
+        <View style={iconContainerStyle ?? styles.buttonIcon}>
+          {typeof icon === "string" ? (
+            <Icon name={icon} color="#fff" size={24} />
+          ) : (
+            icon
+          )}
         </View>
       )}
-      {!!text && <Text style={styles.buttonText}>{text}</Text>}
+      {!!text && <Text style={textStyle ?? styles.buttonText}>{text}</Text>}
       {children}
     </RectButton>
   );
@@ -42,7 +65,6 @@ const styles = StyleSheet.create({
   buttonIcon: {
     height: 60,
     width: 60,
-    backgroundColor: "rgba(0, 0, 0, 0.1)",
     justifyContent: "center",
     alignItems: "center",
   },

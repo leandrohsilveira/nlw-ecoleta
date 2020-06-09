@@ -16,3 +16,5 @@ export interface Point extends AbstractPoint {
 }
 
 export interface PointModel extends AbstractModel, AbstractPoint {}
+
+export interface PointDetailModel extends AbstractModel, Point {}

@@ -1,11 +1,17 @@
 import createApi from "../../util/api";
-import { Point, PointModel } from "./model";
-import { ResultList } from "../model";
+import { Point, PointModel, PointDetailModel } from "./model";
+import { ResultList, Result } from "../model";
 
 async function create(point: Point) {
   const api = createApi();
   const response = await api.post("/points", point);
   console.log(response.data);
+}
+
+async function findById(id: number) {
+  const api = createApi();
+  const response = await api.get<Result<PointDetailModel>>(`/points/${id}`);
+  return response.data;
 }
 
 async function findAllByUfAndCityAndItensIn(
@@ -26,6 +32,7 @@ async function findAllByUfAndCityAndItensIn(
 
 const pointService = {
   create,
+  findById,
   findAllByUfAndCityAndItensIn,
 };
 

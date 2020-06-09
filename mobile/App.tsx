@@ -5,6 +5,12 @@ import { Roboto_400Regular, Roboto_500Medium } from "@expo-google-fonts/roboto";
 import { Ubuntu_700Bold, useFonts } from "@expo-google-fonts/ubuntu";
 import Router from "./components/Router";
 
+import { applyConfigurations } from "ecoleta-core";
+
+applyConfigurations({
+  backendBaseUrl: "http://192.168.1.100:3333",
+});
+
 export default function App() {
   const [fontsLoaded] = useFonts({
     Roboto_400Regular,

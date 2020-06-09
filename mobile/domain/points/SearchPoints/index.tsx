@@ -1,23 +1,52 @@
-import React, { FC } from "react";
+import React, { FC, useState, useEffect } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
-import Constants from "expo-constants";
 import { TouchableOpacity, ScrollView } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import MapView, { Marker } from "react-native-maps";
 import { SvgUri } from "react-native-svg";
+import { Routes } from "../../../components/Router/routes";
 import BackButton from "../../../components/BackButton";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  useApiCallback,
+  Item,
+  itemService,
+  pointService,
+  PointModel,
+} from "ecoleta-core";
+import { ResultList } from "ecoleta-core/dist/domain/model";
 
-const SearchPoints: FC = () => {
+function SearchPoints() {
   const navigation = useNavigation();
+  const [items, setItems] = useState<Item[]>([]);
+  const [points, setPoints] = useState<ResultList<PointModel>>();
 
-  function handleBackButtonPressed() {
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-    }
+  const [fetchItems, , cancelFetchItems] = useApiCallback(
+    itemService.findAll,
+    setItems
+  );
+
+  const [fetchPoints, , cancelFetchPoints] = useApiCallback(
+    pointService.findAllByUfAndCityAndItensIn,
+    setPoints
+  );
+
+  useEffect(() => {
+    fetchItems();
+    return () => cancelFetchItems();
+  }, []);
+
+  useEffect(() => {
+    fetchPoints("SC", "Joinville", [1, 2]);
+    return () => cancelFetchPoints();
+  }, []);
+
+  function handleMapMarkerPressed(point_id: number) {
+    navigation.navigate(Routes.POINT_DETAIL, { point_id });
   }
 
   return (
-    <>
+    <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
         <BackButton />
 
@@ -36,24 +65,28 @@ const SearchPoints: FC = () => {
               longitudeDelta: 0.014,
             }}
           >
-            <Marker
-              style={styles.mapMarker}
-              coordinate={{
-                latitude: -26.2779994,
-                longitude: -48.8095674,
-              }}
-            >
-              <View style={styles.mapMarkerContainer}>
-                <Image
-                  style={styles.mapMarkerImage}
-                  source={{
-                    uri:
-                      "https://fastly.4sqi.net/img/general/600x600/0VQDHKYUTw4a4fO3VJursPyuBhvTqx3dfq679ytD5ss.jpg",
-                  }}
-                />
-                <Text style={styles.mapMarkerTitle}>Supermercado Taíse</Text>
-              </View>
-            </Marker>
+            {(points?.items ?? []).map(({ id, latitude, longitude, name }) => (
+              <Marker
+                key={String(id)}
+                style={styles.mapMarker}
+                onPress={() => handleMapMarkerPressed(id)}
+                coordinate={{
+                  latitude: latitude,
+                  longitude: longitude,
+                }}
+              >
+                <View style={styles.mapMarkerContainer}>
+                  <Image
+                    style={styles.mapMarkerImage}
+                    source={{
+                      uri:
+                        "https://fastly.4sqi.net/img/general/600x600/0VQDHKYUTw4a4fO3VJursPyuBhvTqx3dfq679ytD5ss.jpg",
+                    }}
+                  />
+                  <Text style={styles.mapMarkerTitle}>{name}</Text>
+                </View>
+              </Marker>
+            ))}
           </MapView>
         </View>
       </View>
@@ -63,27 +96,32 @@ const SearchPoints: FC = () => {
           showsHorizontalScrollIndicator={false}
           horizontal
         >
-          {[1, 2, 3, 4, 5, 6].map((v) => (
-            <TouchableOpacity key={v} style={styles.item} onPress={() => {}}>
+          {items.map(({ id, image_url, title }) => (
+            <TouchableOpacity
+              key={String(id)}
+              style={styles.item}
+              onPress={() => {}}
+            >
               <SvgUri
                 width={42}
                 height={42}
-                uri="http://192.168.0.12:3333/uploads/lampadas.svg"
+                uri={image_url}
+                accessibilityLabel={title}
               />
-              <Text style={styles.itemTitle}>Lâmpadas</Text>
+              <Text style={styles.itemTitle}>{title}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
       </View>
-    </>
+    </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 32,
-    paddingTop: 20 + Constants.statusBarHeight,
+    paddingTop: 20,
   },
 
   title: {

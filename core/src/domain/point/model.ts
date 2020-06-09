@@ -1,4 +1,6 @@
-export interface Point {
+import { AbstractModel } from "../model";
+
+interface AbstractPoint {
   name: string;
   image: string;
   email: string;
@@ -7,5 +9,10 @@ export interface Point {
   longitude: number;
   uf: string;
   city: string;
+}
+
+export interface Point extends AbstractPoint {
   items: number[];
 }
+
+export interface PointModel extends AbstractModel, AbstractPoint {}

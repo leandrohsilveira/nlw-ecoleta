@@ -8,6 +8,8 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 .yalc
+yalc.lock
+
 web-build/
 web-report/
 

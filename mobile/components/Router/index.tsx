@@ -20,6 +20,7 @@ const Router = () => {
       >
         <AppStack.Screen name={Routes.HOME} component={Home} />
         <AppStack.Screen name={Routes.SEARCH_POINTS} component={SearchPoints} />
+        <AppStack.Screen name={Routes.POINT_DETAIL} component={PointDetail} />
       </AppStack.Navigator>
     </NavigationContainer>
   );

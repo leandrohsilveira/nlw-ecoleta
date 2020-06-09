@@ -8,6 +8,9 @@
     },
     {
       "path": "mobile"
+    },
+    {
+      "path": "core"
     }
   ],
   "settings": {}

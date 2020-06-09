@@ -1,4 +1,5 @@
 import { AbstractModel } from "../model";
+import { Item } from "../item/model";
 
 interface AbstractPoint {
   name: string;
@@ -17,4 +18,6 @@ export interface Point extends AbstractPoint {
 
 export interface PointModel extends AbstractModel, AbstractPoint {}
 
-export interface PointDetailModel extends AbstractModel, Point {}
+export interface PointDetailModel extends AbstractModel, AbstractPoint {
+  items: Item[];
+}

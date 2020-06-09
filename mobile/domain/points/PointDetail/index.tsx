@@ -1,6 +1,6 @@
 import React, { FC, useState, useEffect } from "react";
 import { FontAwesome } from "@expo/vector-icons";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, Linking } from "react-native";
 import { useRoute, RouteProp, ParamListBase } from "@react-navigation/native";
 import BackButton from "../../../components/BackButton";
 import IconTextButton from "../../../components/IconTextButton";
@@ -12,6 +12,7 @@ import {
   itemService,
 } from "ecoleta-core";
 import { Result } from "ecoleta-core/dist/domain/model";
+import * as MailComposer from "expo-mail-composer";
 
 interface PointDetailRouteParams {
   point_id: number;
@@ -32,6 +33,23 @@ const PointDetail: FC = () => {
     fetchPointDetail(point_id);
     return () => cancelPointDetailFetch();
   }, [point_id]);
+
+  function handleEmailButtonClick() {
+    if (point) {
+      MailComposer.composeAsync({
+        subject: "Interesse na coleta de resíduos",
+        recipients: [point.item.email],
+      });
+    }
+  }
+
+  function handleWhatsAppButtonClick() {
+    if (point) {
+      Linking.openURL(
+        `whatsapp://send?phone=+55${point.item.whatsapp}&text=Tenho interesse em coleta de resíduos`
+      );
+    }
+  }
 
   return (
     <SafeAreaView
@@ -74,7 +92,7 @@ const PointDetail: FC = () => {
           textStyle={styles.buttonText}
           icon={<FontAwesome name="whatsapp" size={20} color="#fff" />}
           text="WhatsApp"
-          onPress={() => {}}
+          onPress={handleWhatsAppButtonClick}
         />
         <IconTextButton
           enabled={!loadingPointDetail}
@@ -83,7 +101,7 @@ const PointDetail: FC = () => {
           textStyle={styles.buttonText}
           icon="mail"
           text="E-mail"
-          onPress={() => {}}
+          onPress={handleEmailButtonClick}
         />
       </View>
     </SafeAreaView>

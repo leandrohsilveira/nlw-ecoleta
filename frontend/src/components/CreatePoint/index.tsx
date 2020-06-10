@@ -29,6 +29,7 @@ import Logo from "../Logo";
 import Overlay from "../Overlay";
 import Button from "../Button";
 import CollectItems from "../CollectItems";
+import FieldSet from "../FieldSet";
 
 L.Icon.Default.imagePath = "assets/images/";
 
@@ -160,10 +161,7 @@ const CreatePoint = () => {
         <form onSubmit={handleSubmit}>
           <h1>Cadastro do ponto de coleta</h1>
 
-          <fieldset>
-            <legend>
-              <h2>Dados</h2>
-            </legend>
+          <FieldSet title="Dados">
             <div className="field">
               <label htmlFor="name">Nome da entidade</label>
               <input
@@ -196,14 +194,9 @@ const CreatePoint = () => {
                 />
               </div>
             </div>
-          </fieldset>
+          </FieldSet>
 
-          <fieldset>
-            <legend>
-              <h2>Endereço</h2>
-              <span>Selecione o endereço no mapa</span>
-            </legend>
-
+          <FieldSet title="Endereço" hint="Selecione o endereço no mapa">
             <Map
               center={mapCenter}
               zoom={15}
@@ -275,20 +268,18 @@ const CreatePoint = () => {
                 </select>
               </div>
             </div>
-          </fieldset>
+          </FieldSet>
 
-          <fieldset>
-            <legend>
-              <h2>Ítens de coleta</h2>
-              <span>Selecione um ou mais ítens abaixo</span>
-            </legend>
-
+          <FieldSet
+            title="Ítens de coleta"
+            hint="Selecione um ou mais ítens abaixo"
+          >
             <CollectItems
               items={items}
               selectedItems={selectedItems}
               onItemClick={handleItemClick}
             />
-          </fieldset>
+          </FieldSet>
 
           <Button type="submit">Cadastrar ponto de coleta</Button>
         </form>

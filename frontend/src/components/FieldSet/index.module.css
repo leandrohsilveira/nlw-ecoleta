@@ -1,0 +1,23 @@
+.fieldSet {
+  margin-top: 64px;
+  min-inline-size: auto;
+  border: 0;
+}
+
+.fieldSet > legend {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.fieldSet > legend > h2 {
+  font-size: 24px;
+}
+
+.fieldSet > legend > span {
+  font-size: 14px;
+  font-weight: normal;
+  color: var(--text-color);
+}

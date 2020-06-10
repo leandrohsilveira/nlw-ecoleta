@@ -27,6 +27,7 @@ import L, { LeafletMouseEvent, LatLngTuple } from "leaflet";
 import useGeolocation, { latLngPositionParser } from "../../util/location";
 import Logo from "../Logo";
 import Overlay from "../Overlay";
+import Button from "../Button";
 
 L.Icon.Default.imagePath = "assets/images/";
 
@@ -295,7 +296,7 @@ const CreatePoint = () => {
             </ul>
           </fieldset>
 
-          <button type="submit">Cadastrar ponto de coleta</button>
+          <Button type="submit">Cadastrar ponto de coleta</Button>
         </form>
       </main>
     </div>

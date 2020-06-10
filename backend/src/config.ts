@@ -1,6 +1,8 @@
 import { CorsOptions } from "cors";
 
 interface ServerConfiguration {
+  getOpenCageApiUrl(): string;
+  getOpenCageApiKey(): string;
   getPort(): number;
   getCors(): CorsOptions;
 }
@@ -11,10 +13,6 @@ interface ValueParser<T> {
 
 interface DefaultValueSupplier<T> {
   (): T;
-}
-
-function asString(value: string) {
-  return value;
 }
 
 function splitByCommaParser<T>(parser: ValueParser<T>): ValueParser<T[]> {
@@ -46,6 +44,18 @@ function getEnv<T>(
   }
 }
 
+function getOpenCageApiUrl() {
+  return getEnv(
+    "OPENCAGEDATA_API_URL",
+    String,
+    "https://api.opencagedata.com/"
+  );
+}
+
+function getOpenCageApiKey() {
+  return getEnv("OPENCAGEDATA_API_KEY", String);
+}
+
 function getPort(): number {
   return getEnv("SERVER_PORT", Number, 3333);
 }
@@ -53,9 +63,9 @@ function getPort(): number {
 function getCors(): CorsOptions {
   return {
     allowedHeaders: [
-      ...getEnvAsArray("CORS_ALLOWED_HEADERS", asString, () => []),
+      ...getEnvAsArray("CORS_ALLOWED_HEADERS", String, () => []),
     ],
-    methods: getEnvAsArray("CORS_ALLOWED_METHODS", asString, () => [
+    methods: getEnvAsArray("CORS_ALLOWED_METHODS", String, () => [
       "GET",
       "POST",
       "PUT",
@@ -72,6 +82,8 @@ function getCors(): CorsOptions {
 const config: ServerConfiguration = {
   getPort,
   getCors,
+  getOpenCageApiKey,
+  getOpenCageApiUrl,
 };
 
 export default config;

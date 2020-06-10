@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { BrowserRouter, Route } from "react-router-dom";
 
-const Home = React.lazy(() => import("./Home"));
+const Home = React.lazy(() => import("../pages/Home"));
 const CreatePoint = React.lazy(() => import("./CreatePoint"));
 
 const Loading = () => <div>Loading...</div>;

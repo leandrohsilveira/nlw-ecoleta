@@ -2,8 +2,8 @@ import React from "react";
 import { FiLogIn } from "react-icons/fi";
 
 import "./index.css";
-import Logo from "../Logo";
-import LinkButton from "../LinkButton";
+import Logo from "../../components/Logo";
+import LinkButton from "../../components/LinkButton";
 
 const Home = () => {
   return (

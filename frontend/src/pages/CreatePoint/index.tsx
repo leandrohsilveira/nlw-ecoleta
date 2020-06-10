@@ -31,9 +31,9 @@ import Button from "../../components/Button";
 import CollectItems from "../../components/CollectItems";
 import FieldSet from "../../components/FieldSet";
 import Form from "../../components/Form";
-import Field from "../../components/Field";
 import InputField from "../../components/InputField";
 import FieldGroup from "../../components/FieldGroup";
+import SelectField from "../../components/SelectField";
 
 L.Icon.Default.imagePath = "assets/images/";
 
@@ -61,6 +61,7 @@ const CreatePoint = () => {
       municipioId !== -1 ? municipios.find((m) => m.id === municipioId) : null,
     [municipios, municipioId]
   );
+
   const [mapCenter] = useGeolocation(latLngPositionParser, {
     latitude: 0,
     longitude: 0,
@@ -72,6 +73,21 @@ const CreatePoint = () => {
     ibgeService.findAllMunicipiosByUf,
     setMunicipios
   );
+
+  const ufPlaceholder = useMemo(
+    () => (ufsLoading ? "Carregando UFs..." : "Selecione uma UF"),
+    [ufsLoading]
+  );
+  const municipioPlaceholder = useMemo(() => {
+    if (selectedUf) {
+      return municipiosLoading
+        ? `Carregando municipios de ${selectedUf.sigla}`
+        : "Selecione uma cidade";
+    } else {
+      return "Selecione uma UF primeiro";
+    }
+  }, [selectedUf, municipiosLoading]);
+
   const handleFormDataChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const { name, value } = e.target;
@@ -205,59 +221,36 @@ const CreatePoint = () => {
             </Map>
 
             <FieldGroup>
-              <Field htmlFor="uf" label="Estado (UF)" grouped>
-                <select
-                  name="uf"
-                  id="uf"
-                  value={ufId}
-                  onChange={(e) => setUfId(Number(e.target.value))}
-                >
-                  {ufsLoading ? (
-                    <option key={-1} value={-1} disabled>
-                      Carregando UFS...
-                    </option>
-                  ) : (
-                    <option key={-1} value={-1} disabled>
-                      Selecione uma UF
-                    </option>
-                  )}
-
-                  {ufs.map(({ id, nome, sigla }) => (
-                    <option key={id} value={id}>
-                      {nome} ({sigla})
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field htmlFor="city" label="Cidade" grouped>
-                <select
-                  name="city"
-                  id="city"
-                  value={municipioId}
-                  onChange={(e) => setMunicipioId(Number(e.target.value))}
-                >
-                  {selectedUf && !municipiosLoading && (
-                    <option key={-1} value={-1} disabled>
-                      Selecione uma cidade
-                    </option>
-                  )}
-                  {!selectedUf && !municipiosLoading && (
-                    <option key={-1} value={-1} disabled>
-                      Selecione uma UF primeiro
-                    </option>
-                  )}
-                  {municipiosLoading && (
-                    <option key={-1} value={-1} disabled>
-                      Carregando cidades de {selectedUf?.sigla}
-                    </option>
-                  )}
-                  {municipios.map(({ id, nome }) => (
-                    <option key={id} value={id}>
-                      {nome}
-                    </option>
-                  ))}
-                </select>
-              </Field>
+              <SelectField
+                name="uf"
+                label="Estado (UF)"
+                value={ufId}
+                onChange={(e) => setUfId(Number(e.target.value))}
+                placeholder={{
+                  value: -1,
+                  label: ufPlaceholder,
+                }}
+                items={ufs.map(({ id, nome, sigla }) => ({
+                  value: id,
+                  label: `${nome} (${sigla})`,
+                }))}
+                grouped
+              />
+              <SelectField
+                name="city"
+                label="Cidade"
+                value={municipioId}
+                onChange={(e) => setMunicipioId(Number(e.target.value))}
+                placeholder={{
+                  value: -1,
+                  label: municipioPlaceholder,
+                }}
+                items={municipios.map(({ id, nome }) => ({
+                  value: id,
+                  label: nome,
+                }))}
+                grouped
+              />
             </FieldGroup>
           </FieldSet>
 

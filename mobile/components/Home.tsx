@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { View, Text, StyleSheet, Image, ImageBackground } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { Routes } from "../Router/routes";
-import IconTextButton from "../IconTextButton";
+import { Routes } from "./Router/routes";
+import IconTextButton from "./IconTextButton";
 import SelectInput from "react-native-picker-select";
 import {
   useApiCallback,
@@ -71,11 +71,11 @@ const Home = () => {
   return (
     <ImageBackground
       style={styles.container}
-      source={require("../../assets/home-background.png")}
+      source={require("../assets/home-background.png")}
       imageStyle={styles.backgroundImage}
     >
       <View style={styles.main}>
-        <Image source={require("../../assets/logo.png")} />
+        <Image source={require("../assets/logo.png")} />
         <Text style={styles.title}>Seu marketplace de coleta de resíduos</Text>
         <Text style={styles.description}>
           Ajudamos pessoas a encontrarem pontos de coleta de forma eficiente

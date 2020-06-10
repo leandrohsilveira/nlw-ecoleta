@@ -4,8 +4,8 @@ import { TouchableOpacity, ScrollView } from "react-native-gesture-handler";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import MapView, { Marker } from "react-native-maps";
 import { SvgUri } from "react-native-svg";
-import { Routes } from "../../../components/Router/routes";
-import BackButton from "../../../components/BackButton";
+import { Routes } from "./Router/routes";
+import BackButton from "./BackButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   useApiCallback,
@@ -17,7 +17,7 @@ import {
   GeolocationModel,
 } from "ecoleta-core";
 import { ResultList } from "ecoleta-core/dist/domain/model";
-import { useRouteParams } from "../../../util/route-util";
+import { useRouteParams } from "../util/route-util";
 
 interface SearchPointsRouteParams {
   uf: string;

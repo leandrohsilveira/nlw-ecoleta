@@ -1,9 +1,9 @@
 import React, { FC, useState, useEffect } from "react";
 import { FontAwesome } from "@expo/vector-icons";
 import { View, Text, StyleSheet, Image, Linking } from "react-native";
-import { useRoute, RouteProp, ParamListBase } from "@react-navigation/native";
-import BackButton from "../../../components/BackButton";
-import IconTextButton from "../../../components/IconTextButton";
+import { useRoute } from "@react-navigation/native";
+import BackButton from "./BackButton";
+import IconTextButton from "./IconTextButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   useApiCallback,

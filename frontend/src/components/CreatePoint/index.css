@@ -27,21 +27,6 @@
   color: var(--primary-color);
 }
 
-#page-create-point form {
-  margin: 80px auto;
-  padding: 64px;
-  max-width: 730px;
-  background: #fff;
-  border-radius: 8px;
-
-  display: flex;
-  flex-direction: column;
-}
-
-#page-create-point form h1 {
-  font-size: 36px;
-}
-
 #page-create-point form .field-group {
   flex: 1;
   display: flex;

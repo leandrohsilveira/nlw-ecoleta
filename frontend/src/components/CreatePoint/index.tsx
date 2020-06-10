@@ -30,6 +30,7 @@ import Overlay from "../Overlay";
 import Button from "../Button";
 import CollectItems from "../CollectItems";
 import FieldSet from "../FieldSet";
+import Form from "../Form";
 
 L.Icon.Default.imagePath = "assets/images/";
 
@@ -158,9 +159,7 @@ const CreatePoint = () => {
       </header>
 
       <main>
-        <form onSubmit={handleSubmit}>
-          <h1>Cadastro do ponto de coleta</h1>
-
+        <Form title="Cadastro do ponto de coleta" onSubmit={handleSubmit}>
           <FieldSet title="Dados">
             <div className="field">
               <label htmlFor="name">Nome da entidade</label>
@@ -282,7 +281,7 @@ const CreatePoint = () => {
           </FieldSet>
 
           <Button type="submit">Cadastrar ponto de coleta</Button>
-        </form>
+        </Form>
       </main>
     </div>
   );

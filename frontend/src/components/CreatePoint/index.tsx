@@ -28,6 +28,7 @@ import useGeolocation, { latLngPositionParser } from "../../util/location";
 import Logo from "../Logo";
 import Overlay from "../Overlay";
 import Button from "../Button";
+import CollectItems from "../CollectItems";
 
 L.Icon.Default.imagePath = "assets/images/";
 
@@ -282,18 +283,11 @@ const CreatePoint = () => {
               <span>Selecione um ou mais ítens abaixo</span>
             </legend>
 
-            <ul className="items-grid">
-              {items.map(({ id, image_url, title }) => (
-                <li
-                  key={id}
-                  className={selectedItems.includes(id) ? "selected" : ""}
-                  onClick={() => handleItemClick(id)}
-                >
-                  <img src={image_url} alt={title} />
-                  <span>{title}</span>
-                </li>
-              ))}
-            </ul>
+            <CollectItems
+              items={items}
+              selectedItems={selectedItems}
+              onItemClick={handleItemClick}
+            />
           </fieldset>
 
           <Button type="submit">Cadastrar ponto de coleta</Button>

@@ -33,6 +33,7 @@ import FieldSet from "../../components/FieldSet";
 import Form from "../../components/Form";
 import Field from "../../components/Field";
 import InputField from "../../components/InputField";
+import FieldGroup from "../../components/FieldGroup";
 
 L.Icon.Default.imagePath = "assets/images/";
 
@@ -169,7 +170,7 @@ const CreatePoint = () => {
               value={formData.name}
               onChange={handleFormDataChange}
             />
-            <div className="field-group">
+            <FieldGroup>
               <InputField
                 name="email"
                 type="email"
@@ -185,7 +186,7 @@ const CreatePoint = () => {
                 onChange={handleFormDataChange}
                 grouped
               />
-            </div>
+            </FieldGroup>
           </FieldSet>
 
           <FieldSet title="Endereço" hint="Selecione o endereço no mapa">
@@ -203,7 +204,7 @@ const CreatePoint = () => {
               {selectedPosition && <Marker position={selectedPosition} />}
             </Map>
 
-            <div className="field-group">
+            <FieldGroup>
               <Field htmlFor="uf" label="Estado (UF)" grouped>
                 <select
                   name="uf"
@@ -257,7 +258,7 @@ const CreatePoint = () => {
                   ))}
                 </select>
               </Field>
-            </div>
+            </FieldGroup>
           </FieldSet>
 
           <FieldSet

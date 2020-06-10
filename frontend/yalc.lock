@@ -1,0 +1,9 @@
+{
+  "version": "v1",
+  "packages": {
+    "ecoleta-core": {
+      "signature": "1e3750c89bba04d1ae483a47c52b746a",
+      "file": true
+    }
+  }
+}

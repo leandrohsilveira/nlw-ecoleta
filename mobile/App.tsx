@@ -7,9 +7,9 @@ import Router from "./components/Router";
 
 import { applyConfigurations } from "ecoleta-core";
 
-applyConfigurations({
-  backendBaseUrl: "http://192.168.1.100:3333",
-});
+import config from "./config";
+
+applyConfigurations(config);
 
 export default function App() {
   const [fontsLoaded] = useFonts({

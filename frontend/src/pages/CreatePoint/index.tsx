@@ -31,6 +31,7 @@ import Button from "../../components/Button";
 import CollectItems from "../../components/CollectItems";
 import FieldSet from "../../components/FieldSet";
 import Form from "../../components/Form";
+import Field from "../../components/Field";
 
 L.Icon.Default.imagePath = "assets/images/";
 
@@ -161,8 +162,7 @@ const CreatePoint = () => {
       <main>
         <Form title="Cadastro do ponto de coleta" onSubmit={handleSubmit}>
           <FieldSet title="Dados">
-            <div className="field">
-              <label htmlFor="name">Nome da entidade</label>
+            <Field htmlFor="name" label="Nome da entidade">
               <input
                 id="name"
                 type="text"
@@ -170,10 +170,9 @@ const CreatePoint = () => {
                 value={formData.name}
                 onChange={handleFormDataChange}
               />
-            </div>
+            </Field>
             <div className="field-group">
-              <div className="field">
-                <label htmlFor="email">E-mail</label>
+              <Field htmlFor="email" label="E-mail" grouped>
                 <input
                   id="email"
                   type="email"
@@ -181,9 +180,8 @@ const CreatePoint = () => {
                   value={formData.email}
                   onChange={handleFormDataChange}
                 />
-              </div>
-              <div className="field">
-                <label htmlFor="whatsapp">WhatsApp</label>
+              </Field>
+              <Field htmlFor="whatsapp" label="WhatsApp" grouped>
                 <input
                   id="whatsapp"
                   type="text"
@@ -191,7 +189,7 @@ const CreatePoint = () => {
                   value={formData.whatsapp}
                   onChange={handleFormDataChange}
                 />
-              </div>
+              </Field>
             </div>
           </FieldSet>
 
@@ -211,8 +209,7 @@ const CreatePoint = () => {
             </Map>
 
             <div className="field-group">
-              <div className="field">
-                <label htmlFor="uf">Estado (UF)</label>
+              <Field htmlFor="uf" label="Estado (UF)" grouped>
                 <select
                   name="uf"
                   id="uf"
@@ -235,9 +232,8 @@ const CreatePoint = () => {
                     </option>
                   ))}
                 </select>
-              </div>
-              <div className="field">
-                <label htmlFor="city">Cidade</label>
+              </Field>
+              <Field htmlFor="city" label="Cidade" grouped>
                 <select
                   name="city"
                   id="city"
@@ -265,7 +261,7 @@ const CreatePoint = () => {
                     </option>
                   ))}
                 </select>
-              </div>
+              </Field>
             </div>
           </FieldSet>
 

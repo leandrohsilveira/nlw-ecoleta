@@ -14,6 +14,7 @@ import {
   ibgeService,
   Point,
   pointService,
+  useApiCallback,
 } from "ecoleta-core";
 
 import "leaflet/dist/leaflet.css";
@@ -23,7 +24,6 @@ import { Link, useHistory } from "react-router-dom";
 import { FiArrowLeft, FiCheckCircle } from "react-icons/fi";
 import { Map, TileLayer, Marker } from "react-leaflet";
 import L, { LeafletMouseEvent, LatLngTuple } from "leaflet";
-import { useApiCallback } from "../../util/api";
 import useGeolocation, { latLngPositionParser } from "../../util/location";
 import Logo from "../Logo";
 import Overlay from "../Overlay";

@@ -6,24 +6,27 @@ import React, {
   ChangeEvent,
   FormEvent,
 } from "react";
+import {
+  Item,
+  IbgeUF,
+  IbgeMunicipio,
+  itemService,
+  ibgeService,
+  Point,
+  pointService,
+} from "ecoleta-core";
 
 import "leaflet/dist/leaflet.css";
-
 import "./index.css";
+
 import { Link, useHistory } from "react-router-dom";
 import { FiArrowLeft, FiCheckCircle } from "react-icons/fi";
 import { Map, TileLayer, Marker } from "react-leaflet";
 import L, { LeafletMouseEvent, LatLngTuple } from "leaflet";
-import itemService from "../../../item/service/itemService";
 import { useApiCallback } from "../../../../util/api";
-import ibgeService from "../../../ibge/service/ibgeService";
-import { Item } from "../../../item/model";
-import { IbgeUF, IbgeMunicipio } from "../../../ibge/model";
 import useGeolocation, {
   latLngPositionParser,
 } from "../../../../util/location";
-import pointService from "../../service/pointService";
-import { Point } from "../../model";
 import Logo from "../../../../components/Logo";
 import Overlay from "../../../../components/Overlay";
 

@@ -32,16 +32,8 @@
   display: flex;
 }
 
-#page-create-point form input[type="text"],
-#page-create-point form input[type="email"],
-#page-create-point form input[type="number"] {
-  flex: 1;
-  background: #f0f0f5;
-  border-radius: 8px;
-  border: 0;
-  padding: 16px 24px;
-  font-size: 16px;
-  color: #6c6c80;
+#page-create-point form :disabled {
+  cursor: not-allowed;
 }
 
 #page-create-point form select {
@@ -55,14 +47,6 @@
   padding: 16px 24px;
   font-size: 16px;
   color: #6c6c80;
-}
-
-#page-create-point form input::placeholder {
-  color: #a0a0b2;
-}
-
-#page-create-point form :disabled {
-  cursor: not-allowed;
 }
 
 #page-create-point form .field-group input + input {

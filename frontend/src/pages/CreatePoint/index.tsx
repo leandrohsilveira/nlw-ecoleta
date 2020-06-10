@@ -32,6 +32,7 @@ import CollectItems from "../../components/CollectItems";
 import FieldSet from "../../components/FieldSet";
 import Form from "../../components/Form";
 import Field from "../../components/Field";
+import InputField from "../../components/InputField";
 
 L.Icon.Default.imagePath = "assets/images/";
 
@@ -162,34 +163,28 @@ const CreatePoint = () => {
       <main>
         <Form title="Cadastro do ponto de coleta" onSubmit={handleSubmit}>
           <FieldSet title="Dados">
-            <Field htmlFor="name" label="Nome da entidade">
-              <input
-                id="name"
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleFormDataChange}
-              />
-            </Field>
+            <InputField
+              name="name"
+              label="Nome da entidade"
+              value={formData.name}
+              onChange={handleFormDataChange}
+            />
             <div className="field-group">
-              <Field htmlFor="email" label="E-mail" grouped>
-                <input
-                  id="email"
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleFormDataChange}
-                />
-              </Field>
-              <Field htmlFor="whatsapp" label="WhatsApp" grouped>
-                <input
-                  id="whatsapp"
-                  type="text"
-                  name="whatsapp"
-                  value={formData.whatsapp}
-                  onChange={handleFormDataChange}
-                />
-              </Field>
+              <InputField
+                name="email"
+                type="email"
+                label="E-mail"
+                value={formData.email}
+                onChange={handleFormDataChange}
+                grouped
+              />
+              <InputField
+                name="whatsapp"
+                label="WhatsApp"
+                value={formData.whatsapp}
+                onChange={handleFormDataChange}
+                grouped
+              />
             </div>
           </FieldSet>
 

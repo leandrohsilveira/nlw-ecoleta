@@ -1,10 +1,10 @@
-interface Config {
+export interface EcoletaCoreConfig {
   backendBaseUrl: string;
 }
 
-let config: Config;
+let config: EcoletaCoreConfig;
 
-function getConfig(): Config {
+function getConfig(): EcoletaCoreConfig {
   if (!config)
     throw new Error(
       "Core module configurations not set, applyConfigurations should be called before any configuration read"
@@ -16,7 +16,7 @@ function getBackendBaseUrl() {
   return getConfig().backendBaseUrl;
 }
 
-export function applyConfigurations(cfg: Config) {
+export function applyConfigurations(cfg: EcoletaCoreConfig) {
   config = cfg;
 }
 

@@ -25,12 +25,12 @@ import { FiArrowLeft, FiCheckCircle } from "react-icons/fi";
 import { Map, TileLayer, Marker } from "react-leaflet";
 import L, { LeafletMouseEvent, LatLngTuple } from "leaflet";
 import useGeolocation, { latLngPositionParser } from "../../util/location";
-import Logo from "../Logo";
-import Overlay from "../Overlay";
-import Button from "../Button";
-import CollectItems from "../CollectItems";
-import FieldSet from "../FieldSet";
-import Form from "../Form";
+import Logo from "../../components/Logo";
+import Overlay from "../../components/Overlay";
+import Button from "../../components/Button";
+import CollectItems from "../../components/CollectItems";
+import FieldSet from "../../components/FieldSet";
+import Form from "../../components/Form";
 
 L.Icon.Default.imagePath = "assets/images/";
 

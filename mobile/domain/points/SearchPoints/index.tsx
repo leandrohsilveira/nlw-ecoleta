@@ -1,7 +1,7 @@
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useState, useEffect, useMemo } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { TouchableOpacity, ScrollView } from "react-native-gesture-handler";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import MapView, { Marker } from "react-native-maps";
 import { SvgUri } from "react-native-svg";
 import { Routes } from "../../../components/Router/routes";
@@ -13,13 +13,28 @@ import {
   itemService,
   pointService,
   PointModel,
+  geolocationService,
+  GeolocationModel,
 } from "ecoleta-core";
 import { ResultList } from "ecoleta-core/dist/domain/model";
+import { useRouteParams } from "../../../util/route-util";
+
+interface SearchPointsRouteParams {
+  uf: string;
+  city: string;
+}
 
 function SearchPoints() {
+  const params = useRouteParams<SearchPointsRouteParams>();
   const navigation = useNavigation();
   const [items, setItems] = useState<Item[]>([]);
-  const [points, setPoints] = useState<ResultList<PointModel>>();
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [pointsResult, setPointsResult] = useState<ResultList<PointModel>>();
+  const [geolocation, setGeolocation] = useState<GeolocationModel>();
+  const [uf] = useState(params.uf);
+  const [city] = useState(params.city);
+
+  const points = useMemo(() => pointsResult?.items ?? [], [pointsResult]);
 
   const [fetchItems, , cancelFetchItems] = useApiCallback(
     itemService.findAll,
@@ -28,7 +43,12 @@ function SearchPoints() {
 
   const [fetchPoints, , cancelFetchPoints] = useApiCallback(
     pointService.findAllByUfAndCityAndItensIn,
-    setPoints
+    setPointsResult
+  );
+
+  const [fetchGeolocationOfUfAndCity, , cancelGeolocation] = useApiCallback(
+    geolocationService.getByUfAndCity,
+    setGeolocation
   );
 
   useEffect(() => {
@@ -37,12 +57,26 @@ function SearchPoints() {
   }, []);
 
   useEffect(() => {
-    fetchPoints("SC", "Joinville", [1, 2]);
+    console.log("Fetching points", uf, city, selectedItems);
+    fetchPoints(uf, city, selectedItems);
     return () => cancelFetchPoints();
-  }, []);
+  }, [uf, city, selectedItems]);
+
+  useEffect(() => {
+    fetchGeolocationOfUfAndCity(uf, city);
+    return () => cancelGeolocation();
+  }, [uf, city]);
 
   function handleMapMarkerPressed(point_id: number) {
     navigation.navigate(Routes.POINT_DETAIL, { point_id });
+  }
+
+  function handleItemPressed(id: number) {
+    setSelectedItems((selectedItems) => {
+      if (selectedItems.includes(id))
+        return selectedItems.filter((item) => item !== id);
+      else return [...selectedItems, id];
+    });
   }
 
   return (
@@ -54,40 +88,45 @@ function SearchPoints() {
         <Text style={styles.description}>
           Encontre no mapa um ponto de coleta.
         </Text>
+        <Text style={styles.description}>
+          Visualizando pontos de coleta para a cidade {city}, {uf}:
+        </Text>
 
         <View style={styles.mapContainer}>
-          <MapView
-            style={styles.map}
-            initialRegion={{
-              latitude: -26.2779994,
-              longitude: -48.8095674,
-              latitudeDelta: 0.014,
-              longitudeDelta: 0.014,
-            }}
-          >
-            {(points?.items ?? []).map(({ id, latitude, longitude, name }) => (
-              <Marker
-                key={String(id)}
-                style={styles.mapMarker}
-                onPress={() => handleMapMarkerPressed(id)}
-                coordinate={{
-                  latitude: latitude,
-                  longitude: longitude,
-                }}
-              >
-                <View style={styles.mapMarkerContainer}>
-                  <Image
-                    style={styles.mapMarkerImage}
-                    source={{
-                      uri:
-                        "https://fastly.4sqi.net/img/general/600x600/0VQDHKYUTw4a4fO3VJursPyuBhvTqx3dfq679ytD5ss.jpg",
-                    }}
-                  />
-                  <Text style={styles.mapMarkerTitle}>{name}</Text>
-                </View>
-              </Marker>
-            ))}
-          </MapView>
+          {geolocation && (
+            <MapView
+              style={styles.map}
+              initialRegion={{
+                latitude: geolocation.lat,
+                longitude: geolocation.lng,
+                latitudeDelta: 0.35,
+                longitudeDelta: 0.35,
+              }}
+            >
+              {points.map(({ id, latitude, longitude, name }) => (
+                <Marker
+                  key={String(id)}
+                  style={styles.mapMarker}
+                  onPress={() => handleMapMarkerPressed(id)}
+                  coordinate={{
+                    latitude: latitude,
+                    longitude: longitude,
+                  }}
+                >
+                  <View style={styles.mapMarkerContainer}>
+                    <Image
+                      style={styles.mapMarkerImage}
+                      source={{
+                        uri:
+                          "https://fastly.4sqi.net/img/general/600x600/0VQDHKYUTw4a4fO3VJursPyuBhvTqx3dfq679ytD5ss.jpg",
+                      }}
+                    />
+                    <Text style={styles.mapMarkerTitle}>{name}</Text>
+                  </View>
+                </Marker>
+              ))}
+            </MapView>
+          )}
         </View>
       </View>
       <View style={styles.itemsContainer}>
@@ -99,8 +138,11 @@ function SearchPoints() {
           {items.map(({ id, image_url, title }) => (
             <TouchableOpacity
               key={String(id)}
-              style={styles.item}
-              onPress={() => {}}
+              style={[
+                styles.item,
+                selectedItems.includes(id) ? styles.selectedItem : {},
+              ]}
+              onPress={() => handleItemPressed(id)}
             >
               <SvgUri
                 width={42}

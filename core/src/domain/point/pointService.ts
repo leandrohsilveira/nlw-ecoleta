@@ -22,9 +22,9 @@ async function findAllByUfAndCityAndItensIn(
   const api = createApi();
   const response = await api.get<ResultList<PointModel>>("/points", {
     params: {
-      uf: uf,
-      city: city,
-      items: items,
+      uf,
+      city,
+      item: items,
     },
   });
   return response.data;

@@ -22,10 +22,7 @@ import Overlay from "../../components/Overlay";
 import Button from "../../components/Button";
 import CollectItems from "../../components/CollectItems";
 import FieldSet from "../../components/FieldSet";
-import Form, {
-  createFormContext,
-  useFormContextValues,
-} from "../../components/Form";
+import Form, { FormErrors } from "../../components/Form";
 import InputField from "../../components/InputField";
 import FieldGroup from "../../components/FieldGroup";
 import IbgeUfSelectField from "../../components/IbgeUfSelectField";
@@ -41,26 +38,22 @@ interface CreatePointFormData {
   city: string | number | IbgeMunicipio;
 }
 
-const CreatePointFormContext = createFormContext<CreatePointFormData>();
-
 const CreatePoint = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [uf, setUf] = useState<IbgeUF>();
   const [municipio, setMunicipio] = useState<IbgeMunicipio>();
   const [selectedPosition, setSelectedPosition] = useState<LatLngTuple>();
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
-  const formData = useFormContextValues<CreatePointFormData>(
-    CreatePointFormContext,
-    {
-      name: "",
-      email: "",
-      whatsapp: "",
-      uf: "",
-      city: "",
-    }
-  );
   const [finished, setFinished] = useState(false);
   const history = useHistory();
+  const [data, setData] = useState<CreatePointFormData>({
+    name: "",
+    email: "",
+    whatsapp: "",
+    uf: "",
+    city: "",
+  });
+  const [errors, setErrors] = useState<FormErrors<CreatePointFormData>>({});
 
   const [mapCenter] = useGeolocation(latLngPositionParser, {
     latitude: 0,
@@ -76,12 +69,20 @@ const CreatePoint = () => {
     });
   }, []);
 
-  async function handleSubmit(_formData: CreatePointFormData) {
+  function handleValuesChanges(
+    values: CreatePointFormData,
+    errors: FormErrors<CreatePointFormData>
+  ) {
+    setData(values);
+    setErrors(errors);
+  }
+
+  async function handleSubmit(values: CreatePointFormData) {
     const errors: { [key: string]: string } = {};
 
-    if (!_formData.name) errors.name = "The name is required";
-    if (!_formData.email) errors.email = "The e-mail is required";
-    if (!_formData.whatsapp) errors.whatsapp = "The WhatsApp is required";
+    if (!values.name) errors.name = "The name is required";
+    if (!values.email) errors.email = "The e-mail is required";
+    if (!values.whatsapp) errors.whatsapp = "The WhatsApp is required";
     if (!uf) errors.uf = "The UF is required";
     if (!municipio) errors.city = "The City is required";
     if (!selectedPosition) errors.position = "The map position is required";
@@ -92,7 +93,7 @@ const CreatePoint = () => {
       const [latitude, longitude] = selectedPosition;
 
       const point: Point = {
-        ..._formData,
+        ...values,
         image: "fake-image.png",
         uf: uf.sigla,
         city: municipio.nome,
@@ -139,14 +140,14 @@ const CreatePoint = () => {
         <Form
           title="Cadastro do ponto de coleta"
           onSubmit={handleSubmit}
-          context={CreatePointFormContext}
-          initialValues={formData}
+          onChange={handleValuesChanges}
+          initialValues={data}
         >
           <FieldSet title="Dados">
             <InputField
               name="name"
               label="Nome da entidade"
-              context={CreatePointFormContext}
+              errors={errors.name}
               required
             />
             <FieldGroup>
@@ -154,14 +155,14 @@ const CreatePoint = () => {
                 name="email"
                 type="email"
                 label="E-mail"
-                context={CreatePointFormContext}
+                errors={errors.email}
                 required
                 grouped
               />
               <InputField
                 name="whatsapp"
                 label="WhatsApp"
-                context={CreatePointFormContext}
+                errors={errors.whatsapp}
                 required
                 grouped
               />
@@ -185,16 +186,16 @@ const CreatePoint = () => {
 
             <FieldGroup>
               <IbgeUfSelectField
-                context={CreatePointFormContext}
                 name="uf"
                 onChange={setUf}
+                errors={errors.uf}
                 grouped
               />
               <IbgeMunicipioSelectField
-                context={CreatePointFormContext}
                 name="city"
-                ufName="uf"
+                uf={uf}
                 onChange={setMunicipio}
+                errors={errors.city}
                 grouped
               />
             </FieldGroup>

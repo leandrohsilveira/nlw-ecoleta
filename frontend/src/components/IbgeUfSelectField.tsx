@@ -1,13 +1,13 @@
 import React, { useMemo, ChangeEvent, useState, useEffect } from "react";
 import SelectField, { SelectFieldItem } from "./SelectField";
-import { IbgeUF, useApiCallback, ibgeService } from "ecoleta-core";
-import { FormContextProps } from "./Form";
+import { IbgeUF, ibgeService, useApiCallback } from "ecoleta-core";
+import { FieldError } from "./Form";
 
-interface IbgeUfSelectFieldProps<T> {
-  name: keyof T;
-  context: React.Context<FormContextProps<T>>;
+interface IbgeUfSelectFieldProps {
+  name: string;
   id?: string;
   label?: string;
+  errors?: FieldError[];
   grouped?: boolean;
   placeholder?: string;
   loadingPlaceholder?: string;
@@ -18,12 +18,12 @@ function IbgeUfSelectField<T>({
   id,
   onChange,
   name,
-  context,
+  errors = [],
   label = "Estado (UF)",
   placeholder = "Selecione um Estado (UF)",
   loadingPlaceholder = "Carregando estados...",
   grouped = false,
-}: IbgeUfSelectFieldProps<T>) {
+}: IbgeUfSelectFieldProps) {
   const [ufs, setUfs] = useState<IbgeUF[]>([]);
   const [fetch, loading, cancel] = useApiCallback(
     ibgeService.findAllUfs,
@@ -62,12 +62,12 @@ function IbgeUfSelectField<T>({
     <SelectField
       id={id}
       name={name}
-      context={context}
       label={label}
       grouped={grouped}
       onChange={handleChange}
       items={items}
       placeholder={placeholderItem}
+      errors={errors}
       required
     />
   );

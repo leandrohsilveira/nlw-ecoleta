@@ -1,20 +1,19 @@
-import React, {
-  useMemo,
-  ChangeEvent,
-  useState,
-  useEffect,
-  useContext,
-} from "react";
+import React, { useMemo, ChangeEvent, useState, useEffect } from "react";
 import SelectField, { SelectFieldItem } from "./SelectField";
-import { useApiCallback, ibgeService, IbgeMunicipio } from "ecoleta-core";
-import { FormContextProps } from "./Form";
+import {
+  useApiCallback,
+  ibgeService,
+  IbgeMunicipio,
+  IbgeUF,
+} from "ecoleta-core";
+import { FieldError } from "./Form";
 
-interface IbgeMunicipioSelectFieldProps<T> {
-  name: keyof T;
-  ufName: keyof T;
-  context: React.Context<FormContextProps<T>>;
+interface IbgeMunicipioSelectFieldProps {
+  name: string;
   id?: string;
+  uf?: IbgeUF;
   label?: string;
+  errors?: FieldError[];
   grouped?: boolean;
   placeholder?: string;
   loadingPlaceholder?: string;
@@ -22,20 +21,18 @@ interface IbgeMunicipioSelectFieldProps<T> {
   onChange?: (value?: IbgeMunicipio) => void;
 }
 
-function IbgeMunicipioSelectField<T>({
+function IbgeMunicipioSelectField({
   id,
-  context,
   onChange,
   name,
-  ufName,
+  uf,
+  errors = [],
   label = "Cidade",
   placeholder = "Selecione uma cidade",
   loadingPlaceholder = "Carregando cidades...",
   ufNotSelectedPlaceholder = "Selecione uma UF primeiro",
   grouped = false,
-}: IbgeMunicipioSelectFieldProps<T>) {
-  const { values } = useContext(context);
-  const uf = values[ufName];
+}: IbgeMunicipioSelectFieldProps) {
   const [municipios, setMunicipios] = useState<IbgeMunicipio[]>([]);
   const [fetch, loading, cancel] = useApiCallback(
     ibgeService.findAllMunicipiosByUf,
@@ -70,7 +67,7 @@ function IbgeMunicipioSelectField<T>({
   }
 
   useEffect(() => {
-    if (uf) fetch(Number(uf));
+    if (uf) fetch(uf.id);
     else setMunicipios([]);
     return () => cancel();
   }, [fetch, cancel, uf]);
@@ -81,10 +78,10 @@ function IbgeMunicipioSelectField<T>({
       name={name}
       label={label}
       grouped={grouped}
-      context={context}
       items={items}
       placeholder={placeholderItem}
       onChange={handleChange}
+      errors={errors}
       required
     />
   );

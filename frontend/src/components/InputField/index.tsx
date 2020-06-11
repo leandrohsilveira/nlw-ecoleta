@@ -1,33 +1,31 @@
-import React, { useContext, ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useState } from "react";
 import Field from "../Field";
 
 import styles from "./index.module.css";
-import { FormContextProps, ValidationProps } from "../Form";
+import { ValidationProps, FieldError } from "../Form";
 
-interface InputFieldProps<T> extends ValidationProps {
-  name: keyof T;
-  context: React.Context<FormContextProps<T>>;
+interface InputFieldProps extends ValidationProps {
+  name: string;
+  label: string;
   id?: string;
   type?: "text" | "number" | "email";
-  label: string;
+  errors?: FieldError[];
   grouped?: boolean;
 }
 
-function InputField<T>({
+function InputField({
   id,
   name,
   label,
-  context,
+  errors = [],
   type = "text",
   grouped = false,
   required = false,
-}: InputFieldProps<T>) {
-  const { errors } = useContext(context);
+}: InputFieldProps) {
   const [dirty, setDirty] = useState(false);
-  const fieldErrors = errors[name];
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
-    setDirty(true);
+    !dirty && setDirty(true);
   }
 
   return (
@@ -35,7 +33,7 @@ function InputField<T>({
       htmlFor={id ?? String(name)}
       label={label}
       grouped={grouped}
-      errors={dirty ? fieldErrors : []}
+      errors={dirty ? errors : []}
       required={required}
     >
       <input

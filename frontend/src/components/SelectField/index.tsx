@@ -1,13 +1,8 @@
-import React, {
-  useContext,
-  useState,
-  ChangeEventHandler,
-  ChangeEvent,
-} from "react";
+import React, { useState, ChangeEventHandler, ChangeEvent } from "react";
 import Field from "../Field";
 
 import styles from "./index.module.css";
-import { FormContextProps, ValidationProps } from "../Form";
+import { ValidationProps, FieldError } from "../Form";
 
 export interface SelectFieldItem {
   key?: string | number;
@@ -16,35 +11,32 @@ export interface SelectFieldItem {
   disabled?: boolean;
 }
 
-interface SelectFieldProps<T> extends ValidationProps {
-  id?: string;
+interface SelectFieldProps extends ValidationProps {
+  name: string;
   label: string;
-  context: React.Context<FormContextProps<T>>;
-  name: keyof T;
-  grouped?: boolean;
-  initialValue?: string;
-  placeholder?: SelectFieldItem;
   items: SelectFieldItem[];
+  id?: string;
   onChange?: ChangeEventHandler<HTMLSelectElement>;
+  placeholder?: SelectFieldItem;
+  grouped?: boolean;
+  errors?: FieldError[];
 }
 
-function SelectField<T>({
+function SelectField({
   id,
   name,
   label,
-  context,
   items,
   placeholder,
   onChange,
+  errors = [],
   required = false,
   grouped = false,
-}: SelectFieldProps<T>) {
-  const { errors } = useContext(context);
+}: SelectFieldProps) {
   const [dirty, setDirty] = useState(false);
-  const fieldErrors = errors[name];
 
   function handleChange(e: ChangeEvent<HTMLSelectElement>) {
-    setDirty(true);
+    !dirty && setDirty(true);
     onChange?.call(onChange, e);
   }
 
@@ -54,7 +46,7 @@ function SelectField<T>({
       label={label}
       grouped={grouped}
       required={required}
-      errors={dirty ? fieldErrors : []}
+      errors={dirty ? errors : []}
     >
       <select
         className={styles.selectField}

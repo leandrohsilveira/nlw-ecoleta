@@ -3,7 +3,7 @@ import Field from "../Field";
 
 import styles from "./index.module.css";
 
-interface SelectFieldItem {
+export interface SelectFieldItem {
   key?: string | number;
   label: string;
   value: string | number;

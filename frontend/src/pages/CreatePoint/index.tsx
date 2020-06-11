@@ -1,7 +1,6 @@
 import React, {
   useState,
   useEffect,
-  useMemo,
   useCallback,
   ChangeEvent,
   FormEvent,
@@ -11,7 +10,6 @@ import {
   IbgeUF,
   IbgeMunicipio,
   itemService,
-  ibgeService,
   Point,
   pointService,
   useApiCallback,
@@ -33,17 +31,15 @@ import FieldSet from "../../components/FieldSet";
 import Form from "../../components/Form";
 import InputField from "../../components/InputField";
 import FieldGroup from "../../components/FieldGroup";
-import SelectField from "../../components/SelectField";
 import IbgeUfSelectField from "../../components/IbgeUfSelectField";
+import IbgeMunicipioSelectField from "../../components/IbgeMunicipioSelectField";
 
 L.Icon.Default.imagePath = "assets/images/";
 
 const CreatePoint = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [uf, setUf] = useState<IbgeUF>();
-
-  const [municipios, setMunicipios] = useState<IbgeMunicipio[]>([]);
-  const [municipioId, setMunicipioId] = useState(-1);
+  const [municipio, setMunicipio] = useState<IbgeMunicipio>();
   const [selectedPosition, setSelectedPosition] = useState<LatLngTuple>();
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [formData, setFormData] = useState({
@@ -53,11 +49,6 @@ const CreatePoint = () => {
   });
   const [finished, setFinished] = useState(false);
   const history = useHistory();
-  const selectedMunicipio = useMemo(
-    () =>
-      municipioId !== -1 ? municipios.find((m) => m.id === municipioId) : null,
-    [municipios, municipioId]
-  );
 
   const [mapCenter] = useGeolocation(latLngPositionParser, {
     latitude: 0,
@@ -65,20 +56,6 @@ const CreatePoint = () => {
   });
 
   const [fetchItems] = useApiCallback(itemService.findAll, setItems);
-  const [fetchMunicipios, municipiosLoading] = useApiCallback(
-    ibgeService.findAllMunicipiosByUf,
-    setMunicipios
-  );
-
-  const municipioPlaceholder = useMemo(() => {
-    if (uf) {
-      return municipiosLoading
-        ? `Carregando municipios de ${uf.sigla}`
-        : "Selecione uma cidade";
-    } else {
-      return "Selecione uma UF primeiro";
-    }
-  }, [uf, municipiosLoading]);
 
   const handleFormDataChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -108,23 +85,18 @@ const CreatePoint = () => {
     if (!formData.whatsapp) errors.whatsapp = "The WhatsApp is required";
     if (!selectedPosition) errors.position = "The map position is required";
     if (!uf) errors.uf = "The UF is required";
-    if (!selectedMunicipio) errors.city = "The City is required";
+    if (!municipio) errors.city = "The City is required";
     if (!selectedItems.length)
       errors.items = "Should select at least one collect item";
 
-    if (
-      !Object.keys(errors).length &&
-      selectedPosition &&
-      selectedMunicipio &&
-      uf
-    ) {
+    if (!Object.keys(errors).length && selectedPosition && uf && municipio) {
       const [latitude, longitude] = selectedPosition;
 
       const point: Point = {
         ...formData,
         image: "fake-image.png",
-        uf: uf?.sigla,
-        city: selectedMunicipio?.nome,
+        uf: uf.sigla,
+        city: municipio.nome,
         items: selectedItems,
         latitude,
         longitude,
@@ -140,10 +112,6 @@ const CreatePoint = () => {
   useEffect(() => {
     fetchItems();
   }, [fetchItems]);
-
-  useEffect(() => {
-    uf && fetchMunicipios(uf.id);
-  }, [uf, fetchMunicipios]);
 
   useEffect(() => {
     if (finished) setTimeout(() => history.push("/"), 2000);
@@ -213,19 +181,10 @@ const CreatePoint = () => {
 
             <FieldGroup>
               <IbgeUfSelectField value={uf} onChange={setUf} grouped />
-              <SelectField
-                name="city"
-                label="Cidade"
-                value={municipioId}
-                onChange={(e) => setMunicipioId(Number(e.target.value))}
-                placeholder={{
-                  value: -1,
-                  label: municipioPlaceholder,
-                }}
-                items={municipios.map(({ id, nome }) => ({
-                  value: id,
-                  label: nome,
-                }))}
+              <IbgeMunicipioSelectField
+                uf={uf}
+                value={municipio}
+                onChange={setMunicipio}
                 grouped
               />
             </FieldGroup>

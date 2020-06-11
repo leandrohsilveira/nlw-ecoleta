@@ -1,7 +1,13 @@
-import React, { FC, ChangeEventHandler } from "react";
+import React, {
+  useContext,
+  useState,
+  ChangeEventHandler,
+  ChangeEvent,
+} from "react";
 import Field from "../Field";
 
 import styles from "./index.module.css";
+import { FormContextProps, ValidationProps } from "../Form";
 
 export interface SelectFieldItem {
   key?: string | number;
@@ -10,36 +16,52 @@ export interface SelectFieldItem {
   disabled?: boolean;
 }
 
-interface SelectFieldProps {
+interface SelectFieldProps<T> extends ValidationProps {
   id?: string;
   label: string;
-  name: string;
+  context: React.Context<FormContextProps<T>>;
+  name: keyof T;
   grouped?: boolean;
-  value?: string | number;
-  onChange?: ChangeEventHandler<HTMLSelectElement>;
   initialValue?: string;
   placeholder?: SelectFieldItem;
   items: SelectFieldItem[];
+  onChange?: ChangeEventHandler<HTMLSelectElement>;
 }
 
-const SelectField: FC<SelectFieldProps> = ({
+function SelectField<T>({
   id,
   name,
   label,
-  value,
+  context,
   items,
-  onChange,
   placeholder,
+  onChange,
+  required = false,
   grouped = false,
-}) => {
+}: SelectFieldProps<T>) {
+  const { errors } = useContext(context);
+  const [dirty, setDirty] = useState(false);
+  const fieldErrors = errors[name];
+
+  function handleChange(e: ChangeEvent<HTMLSelectElement>) {
+    setDirty(true);
+    onChange?.call(onChange, e);
+  }
+
   return (
-    <Field htmlFor={id ?? name} label={label} grouped={grouped}>
+    <Field
+      htmlFor={id ?? String(name)}
+      label={label}
+      grouped={grouped}
+      required={required}
+      errors={dirty ? fieldErrors : []}
+    >
       <select
         className={styles.selectField}
-        id={id ?? name}
-        name={name}
-        value={value}
-        onChange={onChange}
+        id={id ?? String(name)}
+        name={String(name)}
+        onChange={handleChange}
+        required={required}
       >
         {!!placeholder && (
           <option
@@ -58,6 +80,6 @@ const SelectField: FC<SelectFieldProps> = ({
       </select>
     </Field>
   );
-};
+}
 
 export default SelectField;

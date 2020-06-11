@@ -1,29 +1,29 @@
-import React, { FC, useMemo, ChangeEvent, useState, useEffect } from "react";
+import React, { useMemo, ChangeEvent, useState, useEffect } from "react";
 import SelectField, { SelectFieldItem } from "./SelectField";
 import { IbgeUF, useApiCallback, ibgeService } from "ecoleta-core";
+import { FormContextProps } from "./Form";
 
-interface IbgeUfSelectFieldProps {
+interface IbgeUfSelectFieldProps<T> {
+  name: keyof T;
+  context: React.Context<FormContextProps<T>>;
   id?: string;
-  name?: string;
   label?: string;
   grouped?: boolean;
-  value?: IbgeUF;
   placeholder?: string;
   loadingPlaceholder?: string;
   onChange?: (value?: IbgeUF) => void;
 }
 
-const IbgeUfSelectField: FC<IbgeUfSelectFieldProps> = ({
+function IbgeUfSelectField<T>({
   id,
-  value,
   onChange,
-  name = "uf",
+  name,
+  context,
   label = "Estado (UF)",
   placeholder = "Selecione um Estado (UF)",
   loadingPlaceholder = "Carregando estados...",
   grouped = false,
-}) => {
-  const valueId = useMemo(() => value?.id ?? -1, [value]);
+}: IbgeUfSelectFieldProps<T>) {
   const [ufs, setUfs] = useState<IbgeUF[]>([]);
   const [fetch, loading, cancel] = useApiCallback(
     ibgeService.findAllUfs,
@@ -40,14 +40,15 @@ const IbgeUfSelectField: FC<IbgeUfSelectFieldProps> = ({
   const placeholderItem = useMemo<SelectFieldItem>(
     () => ({
       label: loading ? loadingPlaceholder : placeholder,
-      value: -1,
+      value: "",
+      disabled: false,
     }),
     [loading, loadingPlaceholder, placeholder]
   );
 
   function handleChange(e: ChangeEvent<HTMLSelectElement>) {
     if (onChange) {
-      const newValueId = Number(e.target.value ?? "-1");
+      const newValueId = Number(e.target.value ?? "");
       onChange(ufs.find((uf) => uf.id === newValueId));
     }
   }
@@ -61,14 +62,15 @@ const IbgeUfSelectField: FC<IbgeUfSelectFieldProps> = ({
     <SelectField
       id={id}
       name={name}
+      context={context}
       label={label}
       grouped={grouped}
-      value={valueId}
       onChange={handleChange}
       items={items}
       placeholder={placeholderItem}
+      required
     />
   );
-};
+}
 
 export default IbgeUfSelectField;

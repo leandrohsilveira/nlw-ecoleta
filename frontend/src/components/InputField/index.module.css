@@ -1,7 +1,7 @@
 .inputField[type="text"],
 .inputField[type="email"],
 .inputField[type="number"] {
-  flex: 1;
+  height: 60;
   background: #f0f0f5;
   border-radius: 8px;
   border: 0;

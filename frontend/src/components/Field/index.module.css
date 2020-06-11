@@ -14,3 +14,18 @@
 .field.grouped + .field.grouped {
   margin-left: 24px;
 }
+
+.field.error {
+  color: red;
+}
+
+.field > .fieldErrorMessage {
+  display: flex;
+  margin-top: 5px;
+  font-size: 0.9em;
+  align-items: center;
+}
+
+.field > .fieldErrorMessage > span {
+  margin-left: 5px;
+}

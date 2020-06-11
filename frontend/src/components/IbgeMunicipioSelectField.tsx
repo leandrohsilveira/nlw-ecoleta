@@ -1,38 +1,41 @@
-import React, { FC, useMemo, ChangeEvent, useState, useEffect } from "react";
+import React, {
+  useMemo,
+  ChangeEvent,
+  useState,
+  useEffect,
+  useContext,
+} from "react";
 import SelectField, { SelectFieldItem } from "./SelectField";
-import {
-  IbgeUF,
-  useApiCallback,
-  ibgeService,
-  IbgeMunicipio,
-} from "ecoleta-core";
+import { useApiCallback, ibgeService, IbgeMunicipio } from "ecoleta-core";
+import { FormContextProps } from "./Form";
 
-interface IbgeMunicipioSelectFieldProps {
+interface IbgeMunicipioSelectFieldProps<T> {
+  name: keyof T;
+  ufName: keyof T;
+  context: React.Context<FormContextProps<T>>;
   id?: string;
-  name?: string;
   label?: string;
   grouped?: boolean;
-  uf?: IbgeUF;
-  value?: IbgeMunicipio;
   placeholder?: string;
   loadingPlaceholder?: string;
   ufNotSelectedPlaceholder?: string;
   onChange?: (value?: IbgeMunicipio) => void;
 }
 
-const IbgeMunicipioSelectField: FC<IbgeMunicipioSelectFieldProps> = ({
+function IbgeMunicipioSelectField<T>({
   id,
-  value,
+  context,
   onChange,
-  uf,
-  name = "city",
+  name,
+  ufName,
   label = "Cidade",
   placeholder = "Selecione uma cidade",
   loadingPlaceholder = "Carregando cidades...",
   ufNotSelectedPlaceholder = "Selecione uma UF primeiro",
   grouped = false,
-}) => {
-  const valueId = useMemo(() => value?.id ?? -1, [value]);
+}: IbgeMunicipioSelectFieldProps<T>) {
+  const { values } = useContext(context);
+  const uf = values[ufName];
   const [municipios, setMunicipios] = useState<IbgeMunicipio[]>([]);
   const [fetch, loading, cancel] = useApiCallback(
     ibgeService.findAllMunicipiosByUf,
@@ -53,20 +56,22 @@ const IbgeMunicipioSelectField: FC<IbgeMunicipioSelectFieldProps> = ({
         : uf
         ? placeholder
         : ufNotSelectedPlaceholder,
-      value: -1,
+      value: "",
+      disabled: false,
     }),
     [loading, loadingPlaceholder, placeholder, uf, ufNotSelectedPlaceholder]
   );
 
   function handleChange(e: ChangeEvent<HTMLSelectElement>) {
     if (onChange) {
-      const newValueId = Number(e.target.value ?? "-1");
+      const newValueId = Number(e.target.value ?? "");
       onChange(municipios.find((municipio) => municipio.id === newValueId));
     }
   }
 
   useEffect(() => {
-    if (uf) fetch(uf.id);
+    if (uf) fetch(Number(uf));
+    else setMunicipios([]);
     return () => cancel();
   }, [fetch, cancel, uf]);
 
@@ -76,12 +81,13 @@ const IbgeMunicipioSelectField: FC<IbgeMunicipioSelectFieldProps> = ({
       name={name}
       label={label}
       grouped={grouped}
-      value={valueId}
-      onChange={handleChange}
+      context={context}
       items={items}
       placeholder={placeholderItem}
+      onChange={handleChange}
+      required
     />
   );
-};
+}
 
 export default IbgeMunicipioSelectField;

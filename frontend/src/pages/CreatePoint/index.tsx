@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  ChangeEvent,
-  FormEvent,
-} from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Item,
   IbgeUF,
@@ -28,7 +22,10 @@ import Overlay from "../../components/Overlay";
 import Button from "../../components/Button";
 import CollectItems from "../../components/CollectItems";
 import FieldSet from "../../components/FieldSet";
-import Form from "../../components/Form";
+import Form, {
+  createFormContext,
+  useFormContextValues,
+} from "../../components/Form";
 import InputField from "../../components/InputField";
 import FieldGroup from "../../components/FieldGroup";
 import IbgeUfSelectField from "../../components/IbgeUfSelectField";
@@ -36,17 +33,32 @@ import IbgeMunicipioSelectField from "../../components/IbgeMunicipioSelectField"
 
 L.Icon.Default.imagePath = "assets/images/";
 
+interface CreatePointFormData {
+  name: string;
+  email: string;
+  whatsapp: string;
+  uf: string | number | IbgeUF;
+  city: string | number | IbgeMunicipio;
+}
+
+const CreatePointFormContext = createFormContext<CreatePointFormData>();
+
 const CreatePoint = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [uf, setUf] = useState<IbgeUF>();
   const [municipio, setMunicipio] = useState<IbgeMunicipio>();
   const [selectedPosition, setSelectedPosition] = useState<LatLngTuple>();
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    whatsapp: "",
-  });
+  const formData = useFormContextValues<CreatePointFormData>(
+    CreatePointFormContext,
+    {
+      name: "",
+      email: "",
+      whatsapp: "",
+      uf: "",
+      city: "",
+    }
+  );
   const [finished, setFinished] = useState(false);
   const history = useHistory();
 
@@ -57,17 +69,6 @@ const CreatePoint = () => {
 
   const [fetchItems] = useApiCallback(itemService.findAll, setItems);
 
-  const handleFormDataChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      setFormData((_formData) => ({
-        ..._formData,
-        [name]: value,
-      }));
-    },
-    []
-  );
-
   const handleItemClick = useCallback((id: number) => {
     setSelectedItems((_selectedItems) => {
       if (!_selectedItems.includes(id)) return [..._selectedItems, id];
@@ -75,17 +76,15 @@ const CreatePoint = () => {
     });
   }, []);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
+  async function handleSubmit(_formData: CreatePointFormData) {
     const errors: { [key: string]: string } = {};
 
-    if (!formData.name) errors.name = "The name is required";
-    if (!formData.email) errors.email = "The e-mail is required";
-    if (!formData.whatsapp) errors.whatsapp = "The WhatsApp is required";
-    if (!selectedPosition) errors.position = "The map position is required";
+    if (!_formData.name) errors.name = "The name is required";
+    if (!_formData.email) errors.email = "The e-mail is required";
+    if (!_formData.whatsapp) errors.whatsapp = "The WhatsApp is required";
     if (!uf) errors.uf = "The UF is required";
     if (!municipio) errors.city = "The City is required";
+    if (!selectedPosition) errors.position = "The map position is required";
     if (!selectedItems.length)
       errors.items = "Should select at least one collect item";
 
@@ -93,7 +92,7 @@ const CreatePoint = () => {
       const [latitude, longitude] = selectedPosition;
 
       const point: Point = {
-        ...formData,
+        ..._formData,
         image: "fake-image.png",
         uf: uf.sigla,
         city: municipio.nome,
@@ -137,28 +136,33 @@ const CreatePoint = () => {
       </header>
 
       <main>
-        <Form title="Cadastro do ponto de coleta" onSubmit={handleSubmit}>
+        <Form
+          title="Cadastro do ponto de coleta"
+          onSubmit={handleSubmit}
+          context={CreatePointFormContext}
+          initialValues={formData}
+        >
           <FieldSet title="Dados">
             <InputField
               name="name"
               label="Nome da entidade"
-              value={formData.name}
-              onChange={handleFormDataChange}
+              context={CreatePointFormContext}
+              required
             />
             <FieldGroup>
               <InputField
                 name="email"
                 type="email"
                 label="E-mail"
-                value={formData.email}
-                onChange={handleFormDataChange}
+                context={CreatePointFormContext}
+                required
                 grouped
               />
               <InputField
                 name="whatsapp"
                 label="WhatsApp"
-                value={formData.whatsapp}
-                onChange={handleFormDataChange}
+                context={CreatePointFormContext}
+                required
                 grouped
               />
             </FieldGroup>
@@ -180,10 +184,16 @@ const CreatePoint = () => {
             </Map>
 
             <FieldGroup>
-              <IbgeUfSelectField value={uf} onChange={setUf} grouped />
+              <IbgeUfSelectField
+                context={CreatePointFormContext}
+                name="uf"
+                onChange={setUf}
+                grouped
+              />
               <IbgeMunicipioSelectField
-                uf={uf}
-                value={municipio}
+                context={CreatePointFormContext}
+                name="city"
+                ufName="uf"
                 onChange={setMunicipio}
                 grouped
               />

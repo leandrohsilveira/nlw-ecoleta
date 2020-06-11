@@ -1,40 +1,53 @@
-import React, { FC, ChangeEventHandler } from "react";
+import React, { useContext, ChangeEvent, useState } from "react";
 import Field from "../Field";
 
 import styles from "./index.module.css";
+import { FormContextProps, ValidationProps } from "../Form";
 
-interface InputFieldProps {
+interface InputFieldProps<T> extends ValidationProps {
+  name: keyof T;
+  context: React.Context<FormContextProps<T>>;
   id?: string;
   type?: "text" | "number" | "email";
   label: string;
-  name: string;
   grouped?: boolean;
-  value?: string;
-  onChange?: ChangeEventHandler<HTMLInputElement>;
-  initialValue?: string;
 }
 
-const InputField: FC<InputFieldProps> = ({
+function InputField<T>({
   id,
   name,
   label,
-  value,
-  onChange,
+  context,
   type = "text",
   grouped = false,
-}) => {
+  required = false,
+}: InputFieldProps<T>) {
+  const { errors } = useContext(context);
+  const [dirty, setDirty] = useState(false);
+  const fieldErrors = errors[name];
+
+  function handleChange(e: ChangeEvent<HTMLInputElement>) {
+    setDirty(true);
+  }
+
   return (
-    <Field htmlFor={id ?? name} label={label} grouped={grouped}>
+    <Field
+      htmlFor={id ?? String(name)}
+      label={label}
+      grouped={grouped}
+      errors={dirty ? fieldErrors : []}
+      required={required}
+    >
       <input
+        required={required}
         className={styles.inputField}
-        id={id ?? name}
+        id={id ?? String(name)}
         type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
+        name={String(name)}
+        onChange={handleChange}
       />
     </Field>
   );
-};
+}
 
 export default InputField;

@@ -99,8 +99,8 @@ function SearchPoints() {
               initialRegion={{
                 latitude: geolocation.lat,
                 longitude: geolocation.lng,
-                latitudeDelta: 0.35,
-                longitudeDelta: 0.35,
+                latitudeDelta: geolocation.latDelta,
+                longitudeDelta: geolocation.lngDelta,
               }}
             >
               {points.map(({ id, latitude, longitude, name }) => (

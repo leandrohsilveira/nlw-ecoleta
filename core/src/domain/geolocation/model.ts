@@ -7,4 +7,6 @@ export interface GeolocationModel {
   state_code: string;
   lat: number;
   lng: number;
+  latDelta: number;
+  lngDelta: number;
 }

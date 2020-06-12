@@ -1,4 +1,14 @@
-interface OpenCageDataForwardComponent {
+interface OpenCageDataGeometry {
+  lat: number;
+  lng: number;
+}
+
+interface OpenCageDataBounds {
+  northeast: OpenCageDataGeometry;
+  southwest: OpenCageDataGeometry;
+}
+
+interface OpenCageDataComponent {
   city: string;
   continent: string;
   country: string;
@@ -7,27 +17,26 @@ interface OpenCageDataForwardComponent {
   state_code: string;
 }
 
-interface OpenCageDataForwardGeometry {
-  lat: number;
-  lng: number;
-}
-
-interface OpenCageDataForwardResultItem {
+interface OpenCageDataResultItem {
   confidence: number;
-  components: OpenCageDataForwardComponent;
-  geometry: OpenCageDataForwardGeometry;
+  bounds: OpenCageDataBounds;
+  components: OpenCageDataComponent;
+  geometry: OpenCageDataGeometry;
 }
 
-export interface OpenCageDataForwardResponse {
-  results: OpenCageDataForwardResultItem[];
+export interface OpenCageDataResponse {
+  results: OpenCageDataResultItem[];
 }
 
 export interface GeolocationJson
-  extends OpenCageDataForwardComponent,
-    OpenCageDataForwardGeometry {}
+  extends OpenCageDataComponent,
+    OpenCageDataGeometry {
+  latDelta: number;
+  lngDelta: number;
+}
 
-export function serializeForwardResponse(
-  response: OpenCageDataForwardResponse
+export function serializeResponse(
+  response: OpenCageDataResponse
 ): GeolocationJson | undefined {
   const item = response.results[0];
   if (item) {
@@ -40,6 +49,8 @@ export function serializeForwardResponse(
       state_code: item.components.state_code,
       lat: item.geometry.lat,
       lng: item.geometry.lng,
+      latDelta: Math.abs(item.bounds.northeast.lat - item.bounds.southwest.lat),
+      lngDelta: Math.abs(item.bounds.northeast.lng - item.bounds.southwest.lng),
     };
   }
 }

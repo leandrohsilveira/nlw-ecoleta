@@ -8,6 +8,8 @@ export * from "./domain/ibge/model";
 export * from "./domain/item/model";
 export * from "./domain/point/model";
 export * from "./domain/geolocation/model";
+export { Result, ResultError, ResultList } from "./domain/model";
 export { pointService, ibgeService, itemService, geolocationService };
 
 export { useApiCallback } from "./util/api";
+export * from "./util/hook";

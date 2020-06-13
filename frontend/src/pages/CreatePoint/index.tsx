@@ -193,6 +193,12 @@ const CreatePoint = () => {
               />
               {selectedPosition && <Marker position={selectedPosition} />}
             </Map>
+            {location && (
+              <span>
+                <strong>Endereço</strong>: {location.city},{" "}
+                {location.state_code}
+              </span>
+            )}
           </FieldSet>
 
           <FieldSet

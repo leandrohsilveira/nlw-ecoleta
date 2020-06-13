@@ -5,6 +5,7 @@ import {
   ibgeService,
   IbgeMunicipio,
   IbgeUF,
+  GeolocationModel,
 } from "ecoleta-core";
 import { FieldError } from "./Form";
 
@@ -15,6 +16,7 @@ interface IbgeMunicipioSelectFieldProps {
   label?: string;
   errors?: FieldError[];
   grouped?: boolean;
+  location?: GeolocationModel;
   placeholder?: string;
   loadingPlaceholder?: string;
   ufNotSelectedPlaceholder?: string;
@@ -26,6 +28,7 @@ function IbgeMunicipioSelectField({
   onChange,
   name,
   uf,
+  location,
   errors = [],
   label = "Cidade",
   placeholder = "Selecione uma cidade",
@@ -34,6 +37,7 @@ function IbgeMunicipioSelectField({
   grouped = false,
 }: IbgeMunicipioSelectFieldProps) {
   const [municipios, setMunicipios] = useState<IbgeMunicipio[]>([]);
+  const [valueId, setValueId] = useState<number | string>("");
   const [fetch, loading, cancel] = useApiCallback(
     ibgeService.findAllMunicipiosByUf,
     setMunicipios
@@ -54,7 +58,6 @@ function IbgeMunicipioSelectField({
         ? placeholder
         : ufNotSelectedPlaceholder,
       value: "",
-      disabled: false,
     }),
     [loading, loadingPlaceholder, placeholder, uf, ufNotSelectedPlaceholder]
   );
@@ -62,6 +65,7 @@ function IbgeMunicipioSelectField({
   function handleChange(e: ChangeEvent<HTMLSelectElement>) {
     if (onChange) {
       const newValueId = Number(e.target.value ?? "");
+      setValueId(newValueId);
       onChange(municipios.find((municipio) => municipio.id === newValueId));
     }
   }
@@ -71,6 +75,25 @@ function IbgeMunicipioSelectField({
     else setMunicipios([]);
     return () => cancel();
   }, [fetch, cancel, uf]);
+
+  useEffect(() => {
+    if (municipios.length) {
+      let newValueId;
+      let newMunicipio;
+      if (location) {
+        newMunicipio = municipios.find(
+          (municipio) =>
+            municipio.nome?.toUpperCase() === location.city?.toUpperCase()
+        );
+        newValueId = newMunicipio?.id ?? "";
+      } else {
+        newMunicipio = undefined;
+        newValueId = "";
+      }
+      onChange && onChange(newMunicipio);
+      setValueId(newValueId);
+    }
+  }, [municipios, location, onChange]);
 
   return (
     <SelectField
@@ -82,6 +105,8 @@ function IbgeMunicipioSelectField({
       placeholder={placeholderItem}
       onChange={handleChange}
       errors={errors}
+      value={valueId}
+      disabled={!!location}
       required
     />
   );

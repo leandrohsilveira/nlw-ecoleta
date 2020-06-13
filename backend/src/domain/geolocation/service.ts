@@ -19,7 +19,7 @@ async function getByUfAndCity(uf: string, city: string) {
 }
 
 async function getByLatAndLng(lat: number, lng: number) {
-  return await get(`${lat}+${lng}`);
+  return await get(`${lat},${lng}`);
 }
 
 const geolocationService = {

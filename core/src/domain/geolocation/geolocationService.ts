@@ -12,8 +12,20 @@ async function getByUfAndCity(uf: string, city: string) {
   return response.data;
 }
 
+async function getByLatAndLng(lat: number, lng: number) {
+  const api = createApi();
+  const response = await api.get<GeolocationModel>("/geolocation/reverse", {
+    params: {
+      lat,
+      lng,
+    },
+  });
+  return response.data;
+}
+
 const geolocationService = {
   getByUfAndCity,
+  getByLatAndLng,
 };
 
 export default geolocationService;

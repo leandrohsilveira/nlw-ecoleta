@@ -40,7 +40,7 @@ class GeolocationController {
   getByLatAndLng = async (request: Request, response: Response) => {
     this.get(request, response, () => {
       const lat = requestUtil.queryAsArray(request, "lat", Number)[0];
-      const lng = requestUtil.queryAsArray(request, "lnh", Number)[0];
+      const lng = requestUtil.queryAsArray(request, "lng", Number)[0];
       return geolocationService.getByLatAndLng(lat, lng);
     });
   };

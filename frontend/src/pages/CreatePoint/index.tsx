@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Item,
-  itemService,
   Point,
   pointService,
   useApiCallback,
@@ -37,7 +35,6 @@ interface CreatePointFormData {
 }
 
 const CreatePoint = () => {
-  const [items, setItems] = useState<Item[]>([]);
   const [selectedPosition, setSelectedPosition] = useState<LatLngTuple>();
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [finished, setFinished] = useState(false);
@@ -50,22 +47,11 @@ const CreatePoint = () => {
     longitude: 0,
   });
 
-  const [fetchItems, , cancelFetchItems] = useApiCallback(
-    itemService.findAll,
-    setItems
-  );
   const [
     fetchUfAndCityOfPosition,
     ,
     cancelFetchUfAndCityOfPosition,
   ] = useApiCallback(geolocationService.getByLatAndLng, setLocation);
-
-  const handleItemClick = useCallback((id: number) => {
-    setSelectedItems((_selectedItems) => {
-      if (!_selectedItems.includes(id)) return [..._selectedItems, id];
-      else return _selectedItems.filter((i) => i !== id);
-    });
-  }, []);
 
   async function handleSubmit(
     values: CreatePointFormData,
@@ -111,11 +97,6 @@ const CreatePoint = () => {
   ) {
     setErrors(errors);
   }
-
-  useEffect(() => {
-    fetchItems();
-    return cancelFetchItems();
-  }, [fetchItems, cancelFetchItems]);
 
   useEffect(() => {
     if (finished) setTimeout(() => history.push("/"), 2000);
@@ -220,9 +201,8 @@ const CreatePoint = () => {
             errors={errors.items}
           >
             <CollectItems
-              items={items}
               selectedItems={selectedItems}
-              onItemClick={handleItemClick}
+              onSelectedItemsChange={setSelectedItems}
             />
           </FieldSet>
 

@@ -1,4 +1,4 @@
-import React, { Props, FC } from "react";
+import React, { Props, FC, PropsWithChildren } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
 import { RectButton } from "react-native-gesture-handler";
 import { Feather as Icon } from "@expo/vector-icons";
 
-interface IconTextButtonProps extends Props<IconTextButtonProps> {
+interface IconTextButtonProps {
   onPress?: (pointerInside: boolean) => void;
   icon?: string | JSX.Element;
   text?: string;
@@ -20,7 +20,7 @@ interface IconTextButtonProps extends Props<IconTextButtonProps> {
   enabled?: boolean;
 }
 
-const IconTextButton: FC<IconTextButtonProps> = ({
+const IconTextButton: FC<PropsWithChildren<IconTextButtonProps>> = ({
   icon,
   text,
   style,
@@ -33,7 +33,7 @@ const IconTextButton: FC<IconTextButtonProps> = ({
   return (
     <RectButton
       enabled={enabled}
-      style={style ?? styles.button}
+      style={style ?? [styles.button, !enabled ? styles.buttonDisabled : {}]}
       onPress={onPress}
     >
       {!!icon && (
@@ -60,6 +60,10 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     alignItems: "center",
     marginTop: 8,
+  },
+
+  buttonDisabled: {
+    opacity: 0.3,
   },
 
   buttonIcon: {

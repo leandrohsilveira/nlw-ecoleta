@@ -1,8 +1,12 @@
 import React, { FC, useState, useEffect, useMemo } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
-import { TouchableOpacity, ScrollView } from "react-native-gesture-handler";
+import {
+  TouchableOpacity,
+  ScrollView,
+  RectButton,
+} from "react-native-gesture-handler";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, Region } from "react-native-maps";
 import { SvgUri } from "react-native-svg";
 import { Routes } from "./Router/routes";
 import BackButton from "./BackButton";
@@ -15,9 +19,11 @@ import {
   PointModel,
   geolocationService,
   GeolocationModel,
+  useDidMountEffect,
 } from "ecoleta-core";
 import { ResultList } from "ecoleta-core/dist/domain/model";
 import { useRouteParams } from "../util/route-util";
+import IconTextButton from "./IconTextButton";
 
 interface SearchPointsRouteParams {
   uf: string;
@@ -31,8 +37,12 @@ function SearchPoints() {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [pointsResult, setPointsResult] = useState<ResultList<PointModel>>();
   const [geolocation, setGeolocation] = useState<GeolocationModel>();
-  const [uf] = useState(params.uf);
-  const [city] = useState(params.city);
+  const [region, setRegion] = useState<Region>();
+  const [locationChanged, setLocationChanged] = useState(false);
+  const [location, setLocation] = useState({
+    uf: params.uf,
+    city: params.city,
+  });
 
   const points = useMemo(() => pointsResult?.items ?? [], [pointsResult]);
 
@@ -51,21 +61,43 @@ function SearchPoints() {
     setGeolocation
   );
 
+  const [
+    fetchGeolocationByLatAndLng,
+    ,
+    cancelGeolocationLatLng,
+  ] = useApiCallback(geolocationService.getByLatAndLng, setGeolocation);
+
   useEffect(() => {
     fetchItems();
     return () => cancelFetchItems();
   }, []);
 
   useEffect(() => {
+    const { city, uf } = location;
     console.log("Fetching points", uf, city, selectedItems);
     fetchPoints(uf, city, selectedItems);
+    setLocationChanged(false);
     return () => cancelFetchPoints();
-  }, [uf, city, selectedItems]);
+  }, [location, selectedItems]);
 
   useEffect(() => {
-    fetchGeolocationOfUfAndCity(uf, city);
-    return () => cancelGeolocation();
-  }, [uf, city]);
+    const { city, state_code } = geolocation ?? {};
+    console.log("Geolocation changed", region, state_code, city);
+    if (city && state_code) {
+      setLocation({
+        city: city,
+        uf: state_code,
+      });
+    }
+  }, [geolocation]);
+
+  useDidMountEffect(() => {
+    fetchGeolocationOfUfAndCity(params.uf, params.city);
+    return () => {
+      cancelGeolocation();
+      cancelGeolocationLatLng();
+    };
+  });
 
   function handleMapMarkerPressed(point_id: number) {
     navigation.navigate(Routes.POINT_DETAIL, { point_id });
@@ -79,6 +111,28 @@ function SearchPoints() {
     });
   }
 
+  function handleRegionChangeComplete(region: Region) {
+    if (geolocation) {
+      setRegion(region);
+      const latDelta = Math.abs(region.latitude - geolocation.lat);
+      const lngDelta = Math.abs(region.longitude - geolocation.lng);
+      if (
+        latDelta >= geolocation.latDelta / 3 ||
+        lngDelta >= geolocation.lngDelta / 3
+      ) {
+        setLocationChanged(true);
+      } else {
+        setLocationChanged(false);
+      }
+    }
+  }
+
+  function handleFetchPointsOfRegion() {
+    if (region) {
+      fetchGeolocationByLatAndLng(region.latitude, region.longitude);
+    }
+  }
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -88,46 +142,68 @@ function SearchPoints() {
         <Text style={styles.description}>
           Encontre no mapa um ponto de coleta.
         </Text>
-        <Text style={styles.description}>
-          Visualizando pontos de coleta para a cidade {city}, {uf}:
-        </Text>
+        {geolocation && (
+          <>
+            {!!location.city && !!location.uf && (
+              <Text style={styles.description}>
+                Visualizando pontos de coleta para a cidade {location.city},{" "}
+                {location.uf}:
+              </Text>
+            )}
 
-        <View style={styles.mapContainer}>
-          {geolocation && (
-            <MapView
-              style={styles.map}
-              initialRegion={{
-                latitude: geolocation.lat,
-                longitude: geolocation.lng,
-                latitudeDelta: geolocation.latDelta,
-                longitudeDelta: geolocation.lngDelta,
-              }}
-            >
-              {points.map(({ id, latitude, longitude, name }) => (
-                <Marker
-                  key={String(id)}
-                  style={styles.mapMarker}
-                  onPress={() => handleMapMarkerPressed(id)}
-                  coordinate={{
-                    latitude: latitude,
-                    longitude: longitude,
+            <View style={styles.mapContainer}>
+              <MapView
+                style={styles.map}
+                initialRegion={{
+                  latitude: geolocation.lat,
+                  longitude: geolocation.lng,
+                  latitudeDelta: geolocation.latDelta,
+                  longitudeDelta: geolocation.lngDelta,
+                }}
+                onRegionChangeComplete={handleRegionChangeComplete}
+              >
+                {points.map(({ id, latitude, longitude, name }) => (
+                  <Marker
+                    key={String(id)}
+                    style={styles.mapMarker}
+                    onPress={() => handleMapMarkerPressed(id)}
+                    coordinate={{
+                      latitude: latitude,
+                      longitude: longitude,
+                    }}
+                  >
+                    <View style={styles.mapMarkerContainer}>
+                      <Image
+                        style={styles.mapMarkerImage}
+                        source={{
+                          uri:
+                            "https://fastly.4sqi.net/img/general/600x600/0VQDHKYUTw4a4fO3VJursPyuBhvTqx3dfq679ytD5ss.jpg",
+                        }}
+                      />
+                      <Text style={styles.mapMarkerTitle}>{name}</Text>
+                    </View>
+                  </Marker>
+                ))}
+              </MapView>
+              {locationChanged && (
+                <View
+                  style={{
+                    position: "absolute", //use absolute position to show button on top of the map
+                    top: "80%", //for center align
+                    alignSelf: "center", //for align to right
                   }}
                 >
-                  <View style={styles.mapMarkerContainer}>
-                    <Image
-                      style={styles.mapMarkerImage}
-                      source={{
-                        uri:
-                          "https://fastly.4sqi.net/img/general/600x600/0VQDHKYUTw4a4fO3VJursPyuBhvTqx3dfq679ytD5ss.jpg",
-                      }}
-                    />
-                    <Text style={styles.mapMarkerTitle}>{name}</Text>
-                  </View>
-                </Marker>
-              ))}
-            </MapView>
-          )}
-        </View>
+                  <IconTextButton
+                    style={styles.mapButton}
+                    textStyle={styles.mapButtonText}
+                    text="Carregar pontos de coleta desta região"
+                    onPress={handleFetchPointsOfRegion}
+                  />
+                </View>
+              )}
+            </View>
+          </>
+        )}
       </View>
       <View style={styles.itemsContainer}>
         <ScrollView
@@ -190,6 +266,22 @@ const styles = StyleSheet.create({
   map: {
     width: "100%",
     height: "100%",
+  },
+
+  mapButton: {
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#34CB79",
+    height: 30,
+    marginBottom: 10,
+    alignSelf: "flex-end",
+  },
+
+  mapButtonText: {
+    color: "#fff",
+    fontSize: 12,
   },
 
   mapMarker: {

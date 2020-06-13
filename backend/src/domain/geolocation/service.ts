@@ -6,6 +6,7 @@ async function get(q: string) {
   const api = createApi();
   const response = await api.get<OpenCageDataResponse>("geocode/v1/json", {
     params: {
+      no_annotations: 1,
       key: config.getOpenCageApiKey(),
       q,
     },

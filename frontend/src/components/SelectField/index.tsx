@@ -1,4 +1,4 @@
-import React, { useState, ChangeEventHandler, ChangeEvent } from "react";
+import React, { ChangeEventHandler, ChangeEvent } from "react";
 import Field from "../Field";
 
 import styles from "./index.module.css";
@@ -37,10 +37,7 @@ function SelectField({
   grouped = false,
   disabled = false,
 }: SelectFieldProps) {
-  const [dirty, setDirty] = useState(false);
-
   function handleChange(e: ChangeEvent<HTMLSelectElement>) {
-    !dirty && setDirty(true);
     onChange?.call(onChange, e);
   }
 
@@ -50,7 +47,7 @@ function SelectField({
       label={label}
       grouped={grouped}
       required={required}
-      errors={dirty ? errors : []}
+      errors={errors}
     >
       <select
         className={styles.selectField}

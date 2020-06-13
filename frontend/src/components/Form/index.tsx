@@ -39,6 +39,7 @@ interface FormProps<T> {
   onChange?: FormContextEventHandler<T>;
   validators?: FormValidators<T>;
   title?: string;
+  validateOnChange?: boolean;
 }
 
 function Form<T = any>({
@@ -48,6 +49,7 @@ function Form<T = any>({
   children,
   initialValues,
   validators,
+  validateOnChange = false,
 }: PropsWithChildren<FormProps<T>>) {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState<FormErrors<T>>({});
@@ -75,6 +77,19 @@ function Form<T = any>({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const keys = Object.keys(initialValues);
+    const errors: FormErrors<T> = {};
+    const { elements } = event.currentTarget;
+    for (let i = 0; i < elements.length; i++) {
+      const element = elements[i];
+      if (["input", "select"].includes(element.tagName?.toLowerCase())) {
+        const inputElement = element as HTMLInputElement | HTMLSelectElement;
+        if (keys.includes(inputElement.name)) {
+          const fieldErrors = validate(inputElement);
+          errors[inputElement.name as keyof T] = fieldErrors;
+        }
+      }
+    }
     onSubmit && onSubmit(values, errors);
   }
 
@@ -87,20 +102,22 @@ function Form<T = any>({
       [name]: value,
     };
     setValues(newValues);
-    const currFieldErrors = errors[name as keyof T];
-    const fieldErrors = validate(element);
+    if (validateOnChange) {
+      const currFieldErrors = errors[name as keyof T];
+      const fieldErrors = validate(element);
 
-    let newErrors = errors;
-    if (hasDifferentErrors(currFieldErrors ?? [], fieldErrors)) {
-      console.log("Has different errors", currFieldErrors, fieldErrors);
-      newErrors = {
-        ...errors,
-        [name]: fieldErrors,
-      };
-      setErrors(newErrors);
+      let newErrors = errors;
+      if (hasDifferentErrors(currFieldErrors ?? [], fieldErrors)) {
+        console.log("Has different errors", currFieldErrors, fieldErrors);
+        newErrors = {
+          ...errors,
+          [name]: fieldErrors,
+        };
+        setErrors(newErrors);
+      }
+
+      onChange && onChange(newValues, newErrors);
     }
-
-    onChange && onChange(newValues, newErrors);
   }
 
   return (

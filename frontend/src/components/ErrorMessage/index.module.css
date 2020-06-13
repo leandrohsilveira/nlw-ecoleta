@@ -1,0 +1,11 @@
+.fieldErrorMessage {
+  color: red;
+  display: flex;
+  margin-top: 5px;
+  font-size: 0.9em;
+  align-items: center;
+}
+
+.fieldErrorMessage > span {
+  margin-left: 5px;
+}

@@ -2,7 +2,7 @@ import React, { FC, PropsWithChildren } from "react";
 
 import styles from "./index.module.css";
 import { FieldError } from "../Form";
-import { FiXCircle } from "react-icons/fi";
+import ErrorMessage from "../ErrorMessage";
 
 interface FieldProps {
   label: string;
@@ -28,11 +28,8 @@ const Field: FC<PropsWithChildren<FieldProps>> = ({
     >
       <label htmlFor={htmlFor}>{required ? `* ${label}` : label}</label>
       {children}
-      {errors.map(({ id, message }) => (
-        <div className={styles.fieldErrorMessage} key={id}>
-          <FiXCircle />
-          <span>{message}</span>
-        </div>
+      {errors.map((error) => (
+        <ErrorMessage error={error} />
       ))}
     </div>
   );

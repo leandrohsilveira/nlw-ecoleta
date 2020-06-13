@@ -32,6 +32,8 @@ interface CreatePointFormData {
   name: string;
   email: string;
   whatsapp: string;
+  position: string;
+  items: number[];
 }
 
 const CreatePoint = () => {
@@ -41,11 +43,6 @@ const CreatePoint = () => {
   const [finished, setFinished] = useState(false);
   const [location, setLocation] = useState<GeolocationModel>();
   const history = useHistory();
-  const [data, setData] = useState<CreatePointFormData>({
-    name: "",
-    email: "",
-    whatsapp: "",
-  });
   const [errors, setErrors] = useState<FormErrors<CreatePointFormData>>({});
 
   const [mapCenter] = useGeolocation(latLngPositionParser, {
@@ -70,29 +67,32 @@ const CreatePoint = () => {
     });
   }, []);
 
-  function handleValuesChanges(
+  async function handleSubmit(
     values: CreatePointFormData,
-    errors: FormErrors<CreatePointFormData>
+    formErrors: FormErrors<CreatePointFormData>
   ) {
-    setData(values);
-    setErrors(errors);
-  }
+    const errorAcaoObrigatoria = {
+      id: "required",
+      message: "Esta ação é obrigatória",
+    };
+    const errors: FormErrors<CreatePointFormData> = {
+      ...formErrors,
+      position: !location ? [errorAcaoObrigatoria] : undefined,
+      items: !selectedItems.length ? [errorAcaoObrigatoria] : undefined,
+    };
 
-  async function handleSubmit(values: CreatePointFormData) {
-    const errors: { [key: string]: string } = {};
-
-    if (!location) errors.position = "The map position is required";
-    if (!selectedItems.length)
-      errors.items = "Should select at least one collect item";
-
-    if (!Object.keys(errors).length && selectedPosition && location) {
-      const [latitude, longitude] = selectedPosition;
-
+    if (
+      Object.keys(errors)
+        .map((key) => errors[key as keyof CreatePointFormData]?.length ?? 0)
+        .reduce((sum, length) => sum + length) === 0
+    ) {
+      const [latitude, longitude] = selectedPosition as L.LatLngTuple;
+      const { state_code: uf, city } = location as GeolocationModel;
       const point: Point = {
         ...values,
         image: "fake-image.png",
-        uf: location.state_code,
-        city: location.city,
+        uf,
+        city: city,
         items: selectedItems,
         latitude,
         longitude,
@@ -101,8 +101,15 @@ const CreatePoint = () => {
       await pointService.create(point);
       setFinished(true);
     } else {
-      console.error("The form is invalid", errors);
+      setErrors(errors);
     }
+  }
+
+  function handleChange(
+    values: CreatePointFormData,
+    errors: FormErrors<CreatePointFormData>
+  ) {
+    setErrors(errors);
   }
 
   useEffect(() => {
@@ -151,8 +158,15 @@ const CreatePoint = () => {
         <Form
           title="Cadastro do ponto de coleta"
           onSubmit={handleSubmit}
-          onChange={handleValuesChanges}
-          initialValues={data}
+          onChange={handleChange}
+          initialValues={{
+            name: "",
+            email: "",
+            whatsapp: "",
+            position: "",
+            items: [],
+          }}
+          validateOnChange
         >
           <FieldSet title="Dados">
             <InputField
@@ -180,7 +194,11 @@ const CreatePoint = () => {
             </FieldGroup>
           </FieldSet>
 
-          <FieldSet title="Endereço" hint="Selecione o endereço no mapa">
+          <FieldSet
+            title="Endereço"
+            hint="Selecione o endereço no mapa"
+            errors={errors.position}
+          >
             <Map
               center={mapCenter}
               zoom={15}
@@ -199,6 +217,7 @@ const CreatePoint = () => {
           <FieldSet
             title="Ítens de coleta"
             hint="Selecione um ou mais ítens abaixo"
+            errors={errors.items}
           >
             <CollectItems
               items={items}

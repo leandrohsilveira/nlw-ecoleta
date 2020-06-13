@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, ChangeEventHandler } from "react";
 import Field from "../Field";
 
 import styles from "./index.module.css";
@@ -11,21 +11,21 @@ interface InputFieldProps extends ValidationProps {
   type?: "text" | "number" | "email";
   errors?: FieldError[];
   grouped?: boolean;
+  onChange?: ChangeEventHandler<HTMLInputElement>;
 }
 
 function InputField({
   id,
   name,
   label,
+  onChange,
   errors = [],
   type = "text",
   grouped = false,
   required = false,
 }: InputFieldProps) {
-  const [dirty, setDirty] = useState(false);
-
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
-    !dirty && setDirty(true);
+    onChange && onChange(e);
   }
 
   return (
@@ -33,7 +33,7 @@ function InputField({
       htmlFor={id ?? String(name)}
       label={label}
       grouped={grouped}
-      errors={dirty ? errors : []}
+      errors={errors}
       required={required}
     >
       <input

@@ -9,6 +9,7 @@ interface OpenCageDataBounds {
 }
 
 interface OpenCageDataComponent {
+  _type: string;
   city?: string;
   town?: string;
   village?: string;
@@ -49,18 +50,36 @@ export function serializeResponse(
           !!result.components.village)
     ) ?? response.results[0];
   if (item) {
+    const {
+      components: {
+        _type,
+        town,
+        village,
+        city,
+        continent,
+        country,
+        country_code,
+        state,
+        state_code,
+      },
+      geometry: { lat, lng },
+      bounds: { northeast, southwest },
+    } = item;
+
     return {
-      city:
-        item.components.city ?? item.components.town ?? item.components.village,
-      continent: item.components.continent,
-      country: item.components.country,
-      country_code: item.components.country_code,
-      state: item.components.state,
-      state_code: item.components.state_code,
-      lat: item.geometry.lat,
-      lng: item.geometry.lng,
-      latDelta: Math.abs(item.bounds.northeast.lat - item.bounds.southwest.lat),
-      lngDelta: Math.abs(item.bounds.northeast.lng - item.bounds.southwest.lng),
+      _type,
+      town,
+      village,
+      city: city ?? town ?? village,
+      continent,
+      country,
+      country_code,
+      state,
+      state_code,
+      lat,
+      lng,
+      latDelta: Math.abs(northeast.lat - southwest.lat),
+      lngDelta: Math.abs(northeast.lng - southwest.lng),
     };
   }
 }

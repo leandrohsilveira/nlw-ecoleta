@@ -28,7 +28,7 @@ const FieldSet: FC<PropsWithChildren<FieldSetProps>> = ({
             {!!errors.length && (
               <div className={styles.errorsContainer}>
                 {errors.map((error) => (
-                  <ErrorMessage error={error} />
+                  <ErrorMessage key={error.id} error={error} />
                 ))}
               </div>
             )}

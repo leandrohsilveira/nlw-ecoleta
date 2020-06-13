@@ -29,7 +29,7 @@ const Field: FC<PropsWithChildren<FieldProps>> = ({
       <label htmlFor={htmlFor}>{required ? `* ${label}` : label}</label>
       {children}
       {errors.map((error) => (
-        <ErrorMessage error={error} />
+        <ErrorMessage key={error.id} error={error} />
       ))}
     </div>
   );

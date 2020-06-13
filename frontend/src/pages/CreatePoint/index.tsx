@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Item,
-  IbgeUF,
-  IbgeMunicipio,
   itemService,
   Point,
   pointService,
   useApiCallback,
+  geolocationService,
+  GeolocationModel,
 } from "ecoleta-core";
 
 import "leaflet/dist/leaflet.css";
@@ -25,8 +25,6 @@ import FieldSet from "../../components/FieldSet";
 import Form, { FormErrors } from "../../components/Form";
 import InputField from "../../components/InputField";
 import FieldGroup from "../../components/FieldGroup";
-import IbgeUfSelectField from "../../components/IbgeUfSelectField";
-import IbgeMunicipioSelectField from "../../components/IbgeMunicipioSelectField";
 
 L.Icon.Default.imagePath = "assets/images/";
 
@@ -34,24 +32,19 @@ interface CreatePointFormData {
   name: string;
   email: string;
   whatsapp: string;
-  uf: string | number | IbgeUF;
-  city: string | number | IbgeMunicipio;
 }
 
 const CreatePoint = () => {
   const [items, setItems] = useState<Item[]>([]);
-  const [uf, setUf] = useState<IbgeUF>();
-  const [municipio, setMunicipio] = useState<IbgeMunicipio>();
   const [selectedPosition, setSelectedPosition] = useState<LatLngTuple>();
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [finished, setFinished] = useState(false);
+  const [location, setLocation] = useState<GeolocationModel>();
   const history = useHistory();
   const [data, setData] = useState<CreatePointFormData>({
     name: "",
     email: "",
     whatsapp: "",
-    uf: "",
-    city: "",
   });
   const [errors, setErrors] = useState<FormErrors<CreatePointFormData>>({});
 
@@ -60,7 +53,15 @@ const CreatePoint = () => {
     longitude: 0,
   });
 
-  const [fetchItems] = useApiCallback(itemService.findAll, setItems);
+  const [fetchItems, , cancelFetchItems] = useApiCallback(
+    itemService.findAll,
+    setItems
+  );
+  const [
+    fetchUfAndCityOfPosition,
+    ,
+    cancelFetchUfAndCityOfPosition,
+  ] = useApiCallback(geolocationService.getByLatAndLng, setLocation);
 
   const handleItemClick = useCallback((id: number) => {
     setSelectedItems((_selectedItems) => {
@@ -80,23 +81,18 @@ const CreatePoint = () => {
   async function handleSubmit(values: CreatePointFormData) {
     const errors: { [key: string]: string } = {};
 
-    if (!values.name) errors.name = "The name is required";
-    if (!values.email) errors.email = "The e-mail is required";
-    if (!values.whatsapp) errors.whatsapp = "The WhatsApp is required";
-    if (!uf) errors.uf = "The UF is required";
-    if (!municipio) errors.city = "The City is required";
-    if (!selectedPosition) errors.position = "The map position is required";
+    if (!location) errors.position = "The map position is required";
     if (!selectedItems.length)
       errors.items = "Should select at least one collect item";
 
-    if (!Object.keys(errors).length && selectedPosition && uf && municipio) {
+    if (!Object.keys(errors).length && selectedPosition && location) {
       const [latitude, longitude] = selectedPosition;
 
       const point: Point = {
         ...values,
         image: "fake-image.png",
-        uf: uf.sigla,
-        city: municipio.nome,
+        uf: location.state_code,
+        city: location.city,
         items: selectedItems,
         latitude,
         longitude,
@@ -111,11 +107,26 @@ const CreatePoint = () => {
 
   useEffect(() => {
     fetchItems();
-  }, [fetchItems]);
+    return cancelFetchItems();
+  }, [fetchItems, cancelFetchItems]);
 
   useEffect(() => {
     if (finished) setTimeout(() => history.push("/"), 2000);
   }, [finished, history]);
+
+  useEffect(() => {
+    if (selectedPosition) {
+      const [lat, lng] = selectedPosition;
+      fetchUfAndCityOfPosition(lat, lng);
+    } else {
+      setLocation(undefined);
+    }
+    return () => cancelFetchUfAndCityOfPosition();
+  }, [
+    fetchUfAndCityOfPosition,
+    selectedPosition,
+    cancelFetchUfAndCityOfPosition,
+  ]);
 
   return (
     <div id="page-create-point">
@@ -183,22 +194,6 @@ const CreatePoint = () => {
               />
               {selectedPosition && <Marker position={selectedPosition} />}
             </Map>
-
-            <FieldGroup>
-              <IbgeUfSelectField
-                name="uf"
-                onChange={setUf}
-                errors={errors.uf}
-                grouped
-              />
-              <IbgeMunicipioSelectField
-                name="city"
-                uf={uf}
-                onChange={setMunicipio}
-                errors={errors.city}
-                grouped
-              />
-            </FieldGroup>
           </FieldSet>
 
           <FieldSet

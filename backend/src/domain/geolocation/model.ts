@@ -9,7 +9,9 @@ interface OpenCageDataBounds {
 }
 
 interface OpenCageDataComponent {
-  city: string;
+  city?: string;
+  town?: string;
+  village?: string;
   continent: string;
   country: string;
   country_code: string;
@@ -38,10 +40,18 @@ export interface GeolocationJson
 export function serializeResponse(
   response: OpenCageDataResponse
 ): GeolocationJson | undefined {
-  const item = response.results[0];
+  const item =
+    response.results.find(
+      (result) =>
+        !!result.components.state_code &&
+        (!!result.components.city ||
+          !!result.components.town ||
+          !!result.components.village)
+    ) ?? response.results[0];
   if (item) {
     return {
-      city: item.components.city,
+      city:
+        item.components.city ?? item.components.town ?? item.components.village,
       continent: item.components.continent,
       country: item.components.country,
       country_code: item.components.country_code,

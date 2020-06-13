@@ -19,7 +19,9 @@ interface SelectFieldProps extends ValidationProps {
   onChange?: ChangeEventHandler<HTMLSelectElement>;
   placeholder?: SelectFieldItem;
   grouped?: boolean;
+  disabled?: boolean;
   errors?: FieldError[];
+  value?: number | string | string[];
 }
 
 function SelectField({
@@ -29,9 +31,11 @@ function SelectField({
   items,
   placeholder,
   onChange,
+  value,
   errors = [],
   required = false,
   grouped = false,
+  disabled = false,
 }: SelectFieldProps) {
   const [dirty, setDirty] = useState(false);
 
@@ -54,6 +58,8 @@ function SelectField({
         name={String(name)}
         onChange={handleChange}
         required={required}
+        disabled={disabled}
+        value={value}
       >
         {!!placeholder && (
           <option

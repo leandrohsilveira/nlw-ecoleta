@@ -30,6 +30,15 @@ interface SearchPointsRouteParams {
   city: string;
 }
 
+async function _fetchGeolocationByRegion(
+  region: Region,
+  orElse?: GeolocationModel
+) {
+  const { latitude, longitude } = region;
+  const location = await geolocationService.getByLatAndLng(latitude, longitude);
+  return !!location.city ? location : orElse;
+}
+
 function SearchPoints() {
   const params = useRouteParams<SearchPointsRouteParams>();
   const navigation = useNavigation();
@@ -39,10 +48,6 @@ function SearchPoints() {
   const [geolocation, setGeolocation] = useState<GeolocationModel>();
   const [region, setRegion] = useState<Region>();
   const [locationChanged, setLocationChanged] = useState(false);
-  const [location, setLocation] = useState({
-    uf: params.uf,
-    city: params.city,
-  });
 
   const points = useMemo(() => pointsResult?.items ?? [], [pointsResult]);
 
@@ -62,10 +67,10 @@ function SearchPoints() {
   );
 
   const [
-    fetchGeolocationByLatAndLng,
+    fetchGeolocationByRegion,
     ,
-    cancelGeolocationLatLng,
-  ] = useApiCallback(geolocationService.getByLatAndLng, setGeolocation);
+    cancelGeolocationByRegion,
+  ] = useApiCallback(_fetchGeolocationByRegion, setGeolocation);
 
   useEffect(() => {
     fetchItems();
@@ -73,29 +78,19 @@ function SearchPoints() {
   }, []);
 
   useEffect(() => {
-    const { city, uf } = location;
+    const city = geolocation?.city ?? params.city;
+    const uf = geolocation?.state_code ?? params.uf;
     console.log("Fetching points", uf, city, selectedItems);
     fetchPoints(uf, city, selectedItems);
     setLocationChanged(false);
     return () => cancelFetchPoints();
-  }, [location, selectedItems]);
-
-  useEffect(() => {
-    const { city, state_code } = geolocation ?? {};
-    console.log("Geolocation changed", region, state_code, city);
-    if (city && state_code) {
-      setLocation({
-        city: city,
-        uf: state_code,
-      });
-    }
-  }, [geolocation]);
+  }, [geolocation, selectedItems]);
 
   useDidMountEffect(() => {
     fetchGeolocationOfUfAndCity(params.uf, params.city);
     return () => {
       cancelGeolocation();
-      cancelGeolocationLatLng();
+      cancelGeolocationByRegion();
     };
   });
 
@@ -117,8 +112,8 @@ function SearchPoints() {
       const latDelta = Math.abs(region.latitude - geolocation.lat);
       const lngDelta = Math.abs(region.longitude - geolocation.lng);
       if (
-        latDelta >= geolocation.latDelta / 3 ||
-        lngDelta >= geolocation.lngDelta / 3
+        latDelta >= geolocation.latDelta / 2 ||
+        lngDelta >= geolocation.lngDelta / 2
       ) {
         setLocationChanged(true);
       } else {
@@ -129,7 +124,7 @@ function SearchPoints() {
 
   function handleFetchPointsOfRegion() {
     if (region) {
-      fetchGeolocationByLatAndLng(region.latitude, region.longitude);
+      fetchGeolocationByRegion(region, geolocation);
     }
   }
 
@@ -144,12 +139,10 @@ function SearchPoints() {
         </Text>
         {geolocation && (
           <>
-            {!!location.city && !!location.uf && (
-              <Text style={styles.description}>
-                Visualizando pontos de coleta para a cidade {location.city},{" "}
-                {location.uf}:
-              </Text>
-            )}
+            <Text style={styles.description}>
+              Visualizando pontos de coleta para a cidade {geolocation.city},{" "}
+              {geolocation.state_code}:
+            </Text>
 
             <View style={styles.mapContainer}>
               <MapView

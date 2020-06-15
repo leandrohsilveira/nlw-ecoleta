@@ -30,4 +30,5 @@ export interface GeolocationModel {
   lng: number;
   latDelta: number;
   lngDelta: number;
+  formatted: string;
 }

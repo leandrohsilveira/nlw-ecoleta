@@ -25,6 +25,7 @@ interface OpenCageDataResultItem {
   bounds: OpenCageDataBounds;
   components: OpenCageDataComponent;
   geometry: OpenCageDataGeometry;
+  formatted: string;
 }
 
 export interface OpenCageDataResponse {
@@ -36,6 +37,7 @@ export interface GeolocationJson
     OpenCageDataGeometry {
   latDelta: number;
   lngDelta: number;
+  formatted: string;
 }
 
 export function serializeResponse(
@@ -64,6 +66,7 @@ export function serializeResponse(
       },
       geometry: { lat, lng },
       bounds: { northeast, southwest },
+      formatted,
     } = item;
 
     return {
@@ -78,6 +81,7 @@ export function serializeResponse(
       state_code,
       lat,
       lng,
+      formatted,
       latDelta: Math.abs(northeast.lat - southwest.lat),
       lngDelta: Math.abs(northeast.lng - southwest.lng),
     };

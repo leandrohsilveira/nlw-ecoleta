@@ -53,32 +53,15 @@ export function serializeResponse(
     ) ?? response.results[0];
   if (item) {
     const {
-      components: {
-        _type,
-        town,
-        village,
-        city,
-        continent,
-        country,
-        country_code,
-        state,
-        state_code,
-      },
+      components,
       geometry: { lat, lng },
       bounds: { northeast, southwest },
       formatted,
     } = item;
 
     return {
-      _type,
-      town,
-      village,
-      city: city ?? town ?? village,
-      continent,
-      country,
-      country_code,
-      state,
-      state_code,
+      ...components,
+      city: components.city ?? components.town ?? components.village,
       lat,
       lng,
       formatted,

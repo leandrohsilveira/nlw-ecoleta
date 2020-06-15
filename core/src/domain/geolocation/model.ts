@@ -1,23 +1,5 @@
 export interface GeolocationModel {
-  _type:
-    | "building"
-    | "road"
-    | "village"
-    | "neighbourhood"
-    | "city"
-    | "county"
-    | "postcode"
-    | "partial_postcode"
-    | "terminated_postcode"
-    | "state_district"
-    | "state"
-    | "region"
-    | "island"
-    | "body_of_water"
-    | "country"
-    | "continent"
-    | "ficticious"
-    | "unknown";
+  _type: string;
   city?: string;
   town?: string;
   village?: string;

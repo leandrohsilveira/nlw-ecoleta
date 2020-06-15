@@ -11,6 +11,7 @@ interface InputFieldProps extends ValidationProps {
   type?: "text" | "number" | "email";
   errors?: FieldError[];
   grouped?: boolean;
+  disabled?: boolean;
   value?: string | number | string[];
   onChange?: ChangeEventHandler<HTMLInputElement>;
 }
@@ -25,6 +26,7 @@ function InputField({
   type = "text",
   grouped = false,
   required = false,
+  disabled = false,
 }: InputFieldProps) {
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
     onChange && onChange(e);
@@ -39,6 +41,7 @@ function InputField({
       required={required}
     >
       <input
+        disabled={disabled}
         required={required}
         className={styles.inputField}
         id={id ?? String(name)}

@@ -1,10 +1,9 @@
 import { Router } from "express";
-import GeolocationController from "./controller";
+import { geolocationController } from ".";
 
 const geolocationRouter = Router();
-const controller = new GeolocationController();
 
-geolocationRouter.get("/", controller.getByUfAndCity);
-geolocationRouter.get("/reverse", controller.getByLatAndLng);
+geolocationRouter.get("/", geolocationController.getByUfAndCity);
+geolocationRouter.get("/reverse", geolocationController.getByLatAndLng);
 
 export default geolocationRouter;

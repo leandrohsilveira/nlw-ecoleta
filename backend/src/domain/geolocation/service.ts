@@ -1,32 +1,54 @@
-import { createApi } from "./api";
-import { OpenCageDataResponse, serializeResponse } from "./model";
+import {
+  OpenCageDataResponse,
+  GeolocationJson,
+  serializeResponse,
+} from "./model";
 import config from "../../config";
+import { AxiosInstance } from "axios";
 
-async function get(q: string) {
-  const api = createApi();
-  const response = await api.get<OpenCageDataResponse>("geocode/v1/json", {
-    params: {
-      language: "pt-br",
-      no_annotations: 1,
-      key: config.getOpenCageApiKey(),
-      q,
-    },
-  });
-  const data = response.data;
-  return serializeResponse(data);
+export interface GeolocationService {
+  getByUfAndCity(
+    uf: string,
+    city: string
+  ): Promise<GeolocationJson | undefined>;
+  getByLatAndLng(
+    lat: number,
+    lng: number
+  ): Promise<GeolocationJson | undefined>;
 }
 
-async function getByUfAndCity(uf: string, city: string) {
-  return await get(`${city},${uf},Brazil`);
+class GeolocationServiceImpl implements GeolocationService {
+  constructor(private api: AxiosInstance) {}
+
+  private get = async (q: string) => {
+    const response = await this.api.get<OpenCageDataResponse>(
+      "geocode/v1/json",
+      {
+        params: {
+          language: "pt-br",
+          no_annotations: 1,
+          key: config.getOpenCageApiKey(),
+          q,
+        },
+      }
+    );
+    const data = response.data;
+    return serializeResponse(data);
+  };
+
+  public getByUfAndCity = async (
+    uf: string,
+    city: string
+  ): Promise<GeolocationJson | undefined> => {
+    return await this.get(`${city},${uf},Brazil`);
+  };
+
+  public getByLatAndLng = async (
+    lat: number,
+    lng: number
+  ): Promise<GeolocationJson | undefined> => {
+    return await this.get(`${lat},${lng}`);
+  };
 }
 
-async function getByLatAndLng(lat: number, lng: number) {
-  return await get(`${lat},${lng}`);
-}
-
-const geolocationService = {
-  getByUfAndCity,
-  getByLatAndLng,
-};
-
-export default geolocationService;
+export default GeolocationServiceImpl;

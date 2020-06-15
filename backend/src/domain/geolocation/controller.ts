@@ -1,10 +1,12 @@
 import { Request, Response } from "express";
 import requestUtil from "../../util/request-util";
-import geolocationService from "./service";
+import { GeolocationService } from "./service";
 import { serializePersistenceResult } from "../model";
 import { GeolocationJson } from "./model";
 
 class GeolocationController {
+  constructor(private geolocationService: GeolocationService) {}
+
   private get = async (
     request: Request,
     response: Response,
@@ -33,7 +35,7 @@ class GeolocationController {
     this.get(request, response, () => {
       const uf = requestUtil.queryAsArray(request, "uf", String)[0];
       const city = requestUtil.queryAsArray(request, "city", String)[0];
-      return geolocationService.getByUfAndCity(uf, city);
+      return this.geolocationService.getByUfAndCity(uf, city);
     });
   };
 
@@ -41,7 +43,7 @@ class GeolocationController {
     this.get(request, response, () => {
       const lat = requestUtil.queryAsArray(request, "lat", Number)[0];
       const lng = requestUtil.queryAsArray(request, "lng", Number)[0];
-      return geolocationService.getByLatAndLng(lat, lng);
+      return this.geolocationService.getByLatAndLng(lat, lng);
     });
   };
 }

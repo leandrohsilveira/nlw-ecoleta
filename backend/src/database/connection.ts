@@ -1,6 +1,10 @@
-import knex from "knex";
-import path from "path";
 import Knex from "knex";
+import knex, { Transaction } from "knex";
+import path from "path";
+
+export interface ConnectionFactory {
+  (trx?: Transaction): Knex.QueryBuilder;
+}
 
 export const databaseConnectionConfig: Knex.Config = {
   client: "sqlite3",

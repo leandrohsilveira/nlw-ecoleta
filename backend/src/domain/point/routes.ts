@@ -1,12 +1,10 @@
 import { Router } from "express";
-import PointController from "./controller";
+import { pointController } from ".";
 
 const pointRouter = Router();
 
-const controller = new PointController();
-
-pointRouter.get("/", controller.findAll);
-pointRouter.get("/:id", controller.findById);
-pointRouter.post("/", controller.create);
+pointRouter.get("/", pointController.findAll);
+pointRouter.get("/:id", pointController.findById);
+pointRouter.post("/", pointController.create);
 
 export default pointRouter;

@@ -1,9 +1,9 @@
+import { Request } from "express";
 import createAbstractModel, {
   AbstractModel,
   serializeAbstractJson,
   AbstractJson,
 } from "../model";
-import { Request } from "express";
 import requestUtil from "../../util/request-util";
 
 export interface Item extends AbstractModel {

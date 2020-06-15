@@ -1,16 +1,21 @@
 import { Request, Response } from "express";
-import pointService from "./service";
+import { Transaction } from "knex";
+import { PointService } from "./service";
 import { createPoint, serializePoint, PointJson } from "./model";
 import databaseConnection from "../../database/connection";
-import itemService from "../item/service";
+import { ItemService } from "../item/service";
 import {
   serializePersistenceResult as serializeResult,
   serializeFetchListResult,
 } from "../model";
-import { Transaction } from "knex";
 import requestUtil from "../../util/request-util";
 
 export default class PointController {
+  constructor(
+    private pointService: PointService,
+    private itemService: ItemService
+  ) {}
+
   public findAll = async (request: Request, response: Response) => {
     try {
       const filters = {
@@ -18,7 +23,7 @@ export default class PointController {
         ufs: requestUtil.queryAsArray(request, "uf", String),
         items: requestUtil.queryAsArray(request, "item", Number),
       };
-      const points = await pointService.findAll(filters);
+      const points = await this.pointService.findAll(filters);
       response.json(
         serializeFetchListResult(points, (point) =>
           serializePoint(request, point)
@@ -44,7 +49,7 @@ export default class PointController {
 
     const trx = await databaseConnection.transaction();
     try {
-      const id = await pointService.create(
+      const id = await this.pointService.create(
         createPoint(
           "image-fake",
           name,
@@ -101,9 +106,9 @@ export default class PointController {
     id: number,
     trx?: Transaction
   ): Promise<PointJson | null> => {
-    const point = await pointService.findById(id, trx);
+    const point = await this.pointService.findById(id, trx);
     if (point) {
-      const items = await itemService.findAllByPointItemPointId(id, trx);
+      const items = await this.itemService.findAllByPointItemPointId(id, trx);
       return serializePoint(request, point, items);
     }
     return null;

@@ -1,12 +1,17 @@
 import { Request, Response } from "express";
 
-import itemService from "./service";
-import { Item, serializeItem } from "./model";
+import { ItemService } from "./service";
+import { Item, ItemJson, serializeItem } from "./model";
+
+export interface ItemSerializer {
+  (request: Request, item: Item): ItemJson;
+}
 
 export default class ItemController {
-  async findAll(request: Request, response: Response) {
-    const items: Item[] = await itemService.findAll();
+  constructor(private itemService: ItemService) {}
 
+  async findAll(request: Request, response: Response) {
+    const items: Item[] = await this.itemService.findAll();
     return response.json(items.map((item) => serializeItem(request, item)));
   }
 }

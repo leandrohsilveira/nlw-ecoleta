@@ -1,40 +1,54 @@
+import { Transaction } from "knex";
 import createPointItem, { PointItem } from "./model";
-import databaseConnection from "../../database/connection";
-import Knex, { Transaction } from "knex";
+import databaseConnection, {
+  ConnectionFactory,
+} from "../../database/connection";
+
+export interface PointItemService {
+  create(pointItems: PointItem[], trx?: Transaction): Promise<number[]>;
+
+  createForPoint(
+    point_id: number,
+    itemsIds: number[],
+    trx?: Transaction
+  ): Promise<number[]>;
+
+  findAllByPointId(point_id: number, trx?: Transaction): Promise<PointItem[]>;
+}
 
 function pointItemConnection(trx?: Transaction) {
   return (trx ?? databaseConnection)("point_item");
 }
 
-async function create(
-  pointItems: PointItem[],
-  trx?: Transaction
-): Promise<number[]> {
-  return await pointItemConnection(trx).insert(pointItems);
+class PointItemServiceImpl implements PointItemService {
+  constructor(
+    private connectionFactory: ConnectionFactory = pointItemConnection
+  ) {}
+
+  public create = async (
+    pointItems: PointItem[],
+    trx?: Transaction
+  ): Promise<number[]> => {
+    return await this.connectionFactory(trx).insert(pointItems);
+  };
+
+  public createForPoint = async (
+    point_id: number,
+    itemsIds: number[],
+    trx?: Transaction
+  ): Promise<number[]> => {
+    const pointItems = itemsIds.map((item_id) =>
+      createPointItem(point_id, item_id)
+    );
+    return await this.create(pointItems, trx);
+  };
+
+  public findAllByPointId = async (
+    point_id: number,
+    trx?: Transaction
+  ): Promise<PointItem[]> => {
+    return await this.connectionFactory(trx).select("*").where({ point_id });
+  };
 }
 
-async function createForPoint(
-  point_id: number,
-  itemsIds: number[],
-  trx?: Transaction
-): Promise<number[]> {
-  const pointItems = itemsIds.map((item_id) =>
-    createPointItem(point_id, item_id)
-  );
-  return await create(pointItems, trx);
-}
-
-async function findAllByPointId(
-  point_id: number,
-  trx?: Transaction
-): Promise<PointItem[]> {
-  return await pointItemConnection(trx).select("*").where({ point_id });
-}
-
-const pointItemService = {
-  create,
-  createForPoint,
-  findAllByPointId,
-};
-
-export default pointItemService;
+export default PointItemServiceImpl;

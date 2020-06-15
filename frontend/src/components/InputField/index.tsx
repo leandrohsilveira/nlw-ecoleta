@@ -11,6 +11,7 @@ interface InputFieldProps extends ValidationProps {
   type?: "text" | "number" | "email";
   errors?: FieldError[];
   grouped?: boolean;
+  value?: string | number | string[];
   onChange?: ChangeEventHandler<HTMLInputElement>;
 }
 
@@ -19,6 +20,7 @@ function InputField({
   name,
   label,
   onChange,
+  value,
   errors = [],
   type = "text",
   grouped = false,
@@ -43,6 +45,7 @@ function InputField({
         type={type}
         name={String(name)}
         onChange={handleChange}
+        value={value}
       />
     </Field>
   );

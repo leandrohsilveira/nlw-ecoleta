@@ -1,10 +1,6 @@
 import Knex from "knex";
-import knex, { Transaction } from "knex";
-import path from "path";
 
-export interface ConnectionFactory {
-  (trx?: Transaction): Knex.QueryBuilder;
-}
+import path from "path";
 
 export const databaseConnectionConfig: Knex.Config = {
   client: "sqlite3",
@@ -23,11 +19,3 @@ export const adminDatabaseConnectionConfig: Knex.Config = {
     directory: path.resolve(__dirname, "seeds"),
   },
 };
-
-function createDatabaseConnection(): Knex {
-  return knex(databaseConnectionConfig);
-}
-
-const databaseConnection = createDatabaseConnection();
-
-export default databaseConnection;

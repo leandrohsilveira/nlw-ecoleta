@@ -1,3 +1,3 @@
-import { adminDatabaseConnectionConfig } from "./src/database/connection";
+import { adminDatabaseConnectionConfig } from "./src/database/config";
 
 module.exports = adminDatabaseConnectionConfig;

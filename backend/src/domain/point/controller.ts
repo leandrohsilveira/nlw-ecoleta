@@ -2,18 +2,19 @@ import { Request, Response } from "express";
 import { Transaction } from "knex";
 import { PointService } from "./service";
 import { createPoint, serializePoint, PointJson } from "./model";
-import databaseConnection from "../../database/connection";
 import { ItemService } from "../item/service";
 import {
   serializePersistenceResult as serializeResult,
   serializeFetchListResult,
 } from "../model";
 import requestUtil from "../../util/request-util";
+import { TransactionFactory } from "../../database";
 
 export default class PointController {
   constructor(
     private pointService: PointService,
-    private itemService: ItemService
+    private itemService: ItemService,
+    private createTransaction: TransactionFactory
   ) {}
 
   public findAll = async (request: Request, response: Response) => {
@@ -47,7 +48,7 @@ export default class PointController {
       items,
     } = request.body;
 
-    const trx = await databaseConnection.transaction();
+    const trx = await this.createTransaction();
     try {
       const id = await this.pointService.create(
         createPoint(
@@ -69,14 +70,9 @@ export default class PointController {
         response.json(serializeResult(true, point));
         trx.commit();
       } else {
-        console.error(
-          `Transaction rollback: Something gone wrong because the created point with id ${id} was not found`
-        );
-        response.status(500).json(
-          serializeResult(false, {
-            message: `Something gone wrong because the created point with id ${id} was not found`,
-          })
-        );
+        const message = `Something gone wrong because the created point with id ${id} was not found`;
+        console.error(`Transaction rollback: ${message}`);
+        response.status(500).json(serializeResult(false, { message }));
         trx.rollback();
       }
     } catch (error) {

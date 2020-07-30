@@ -1,11 +1,9 @@
 import Knex, { Transaction } from "knex";
-import databaseConnection, {
-  ConnectionFactory,
-} from "../../database/connection";
 import { Point } from "./model";
 import { FetchModelListResult } from "../model";
 import queryUtil from "../../util/query-util";
 import { PointItemService } from "../point-item/service";
+import { TableConnectionFactory } from "../../database";
 
 interface PointFilters {
   items?: number[];
@@ -28,14 +26,10 @@ const DEFAULT_FILTERS: PointFilters = {
   cities: [],
 };
 
-function pointConnection(trx?: Transaction) {
-  return (trx ?? databaseConnection)("point");
-}
-
 class PointServiceImpl implements PointService {
   constructor(
     private pointItemService: PointItemService,
-    private connectionFactory: ConnectionFactory = pointConnection
+    private connectionFactory: TableConnectionFactory
   ) {}
 
   private applyFilters = (

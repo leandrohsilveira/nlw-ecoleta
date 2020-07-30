@@ -1,8 +1,6 @@
 import { Transaction } from "knex";
 import createPointItem, { PointItem } from "./model";
-import databaseConnection, {
-  ConnectionFactory,
-} from "../../database/connection";
+import { TableConnectionFactory } from "../../database";
 
 export interface PointItemService {
   create(pointItems: PointItem[], trx?: Transaction): Promise<number[]>;
@@ -16,14 +14,8 @@ export interface PointItemService {
   findAllByPointId(point_id: number, trx?: Transaction): Promise<PointItem[]>;
 }
 
-function pointItemConnection(trx?: Transaction) {
-  return (trx ?? databaseConnection)("point_item");
-}
-
 class PointItemServiceImpl implements PointItemService {
-  constructor(
-    private connectionFactory: ConnectionFactory = pointItemConnection
-  ) {}
+  constructor(private connectionFactory: TableConnectionFactory) {}
 
   public create = async (
     pointItems: PointItem[],

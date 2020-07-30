@@ -3,7 +3,7 @@ import {
   GeolocationJson,
   serializeResponse,
 } from "./model";
-import config from "../../config";
+import { OpenCageApiConfiguration } from "../../config";
 import { AxiosInstance } from "axios";
 
 export interface GeolocationService {
@@ -18,7 +18,10 @@ export interface GeolocationService {
 }
 
 class GeolocationServiceImpl implements GeolocationService {
-  constructor(private api: AxiosInstance) {}
+  constructor(
+    private api: AxiosInstance,
+    private config: OpenCageApiConfiguration
+  ) {}
 
   private get = async (q: string) => {
     const response = await this.api.get<OpenCageDataResponse>(
@@ -27,7 +30,7 @@ class GeolocationServiceImpl implements GeolocationService {
         params: {
           language: "pt-br",
           no_annotations: 1,
-          key: config.getOpenCageApiKey(),
+          key: this.config.getOpenCageApiKey(),
           q,
         },
       }

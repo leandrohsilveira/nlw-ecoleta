@@ -14,15 +14,19 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.19.2",
+    "chai": "^4.2.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "knex": "^0.21.1",
+    "mocha": "^8.0.1",
     "sqlite3": "^4.2.0"
   },
   "devDependencies": {
+    "@types/chai": "^4.2.12",
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.6",
+    "@types/mocha": "^8.0.0",
     "ts-node": "^8.10.2",
     "ts-node-dev": "^1.0.0-pre.44",
     "typescript": "^3.9.3"

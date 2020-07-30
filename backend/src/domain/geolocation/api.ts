@@ -1,7 +1,7 @@
 import axios from "axios";
-import config from "../../config";
+import { OpenCageApiConfiguration } from "../../config";
 
-export function createApi() {
+export function createApi(config: OpenCageApiConfiguration) {
   return axios.create({
     baseURL: config.getOpenCageApiUrl(),
   });

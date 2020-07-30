@@ -10,8 +10,8 @@ export interface ItemSerializer {
 export default class ItemController {
   constructor(private itemService: ItemService) {}
 
-  async findAll(request: Request, response: Response) {
+  public findAll = async (request: Request, response: Response) => {
     const items: Item[] = await this.itemService.findAll();
     return response.json(items.map((item) => serializeItem(request, item)));
-  }
+  };
 }

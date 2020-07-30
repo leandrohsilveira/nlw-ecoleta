@@ -1,8 +1,6 @@
 import { Transaction } from "knex";
-import databaseConnection, {
-  ConnectionFactory,
-} from "../../database/connection";
 import { Item } from "./model";
+import { TableConnectionFactory } from "../../database";
 
 export interface ItemService {
   findAll(trx?: Transaction): Promise<Item[]>;
@@ -12,12 +10,8 @@ export interface ItemService {
   ): Promise<Item[]>;
 }
 
-function itemConnection(trx?: Transaction) {
-  return (trx ?? databaseConnection)("item");
-}
-
 class ItemServiceImpl implements ItemService {
-  constructor(private connectionFactory: ConnectionFactory = itemConnection) {}
+  constructor(private connectionFactory: TableConnectionFactory) {}
 
   findAll = async (trx?: Transaction): Promise<Item[]> => {
     return await this.connectionFactory(trx).select("*");

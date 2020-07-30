@@ -47,11 +47,10 @@ const CreatePoint = () => {
     longitude: 0,
   });
 
-  const [
-    fetchUfAndCityOfPosition,
-    ,
-    cancelFetchUfAndCityOfPosition,
-  ] = useApiCallback(geolocationService.getByLatAndLng, setLocation);
+  const [fetchPositionDetails, , cancelFetchPositionDetails] = useApiCallback(
+    geolocationService.getByLatAndLng,
+    setLocation
+  );
 
   async function handleSubmit(
     values: CreatePointFormData,
@@ -74,18 +73,29 @@ const CreatePoint = () => {
     ) {
       const [latitude, longitude] = selectedPosition as L.LatLngTuple;
       const { state_code: uf, city } = location as GeolocationModel;
-      const point: Point = {
-        ...values,
-        image: "fake-image.png",
-        uf,
-        city: city,
-        items: selectedItems,
-        latitude,
-        longitude,
-      };
+      if (city) {
+        const point: Point = {
+          ...values,
+          image: "fake-image.png",
+          uf,
+          city: city,
+          items: selectedItems,
+          latitude,
+          longitude,
+        };
 
-      await pointService.create(point);
-      setFinished(true);
+        await pointService.create(point);
+        setFinished(true);
+      } else {
+        setErrors({
+          position: [
+            {
+              id: "invalid",
+              message: "A localização selecionada é inválida",
+            },
+          ],
+        });
+      }
     } else {
       setErrors(errors);
     }
@@ -105,16 +115,12 @@ const CreatePoint = () => {
   useEffect(() => {
     if (selectedPosition) {
       const [lat, lng] = selectedPosition;
-      fetchUfAndCityOfPosition(lat, lng);
+      fetchPositionDetails(lat, lng);
     } else {
       setLocation(undefined);
     }
-    return () => cancelFetchUfAndCityOfPosition();
-  }, [
-    fetchUfAndCityOfPosition,
-    selectedPosition,
-    cancelFetchUfAndCityOfPosition,
-  ]);
+    return () => cancelFetchPositionDetails();
+  }, [fetchPositionDetails, selectedPosition, cancelFetchPositionDetails]);
 
   return (
     <div id="page-create-point">
@@ -174,7 +180,6 @@ const CreatePoint = () => {
               />
             </FieldGroup>
           </FieldSet>
-
           <FieldSet
             title="Endereço"
             hint="Selecione o endereço no mapa"
@@ -195,12 +200,10 @@ const CreatePoint = () => {
             </Map>
             {location && (
               <span>
-                <strong>Endereço</strong>: {location.city},{" "}
-                {location.state_code}
+                <strong>Endereço</strong>: {location.formatted}
               </span>
             )}
           </FieldSet>
-
           <FieldSet
             title="Ítens de coleta"
             hint="Selecione um ou mais ítens abaixo"

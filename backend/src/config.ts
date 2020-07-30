@@ -1,8 +1,11 @@
 import { CorsOptions } from "cors";
 
-interface ServerConfiguration {
+export interface OpenCageApiConfiguration {
   getOpenCageApiUrl(): string;
   getOpenCageApiKey(): string;
+}
+
+export interface ServerConfiguration extends OpenCageApiConfiguration {
   getPort(): number;
   getCors(): CorsOptions;
 }
